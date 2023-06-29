@@ -1,0 +1,49 @@
+package com.example.myapplication;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Bundle;
+
+import java.util.ArrayList;
+
+public class Transactions extends AppCompatActivity {
+
+    ArrayList<Transaction> transactions = new ArrayList<>();
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_transactions);
+
+        RecyclerView recyclerView = findViewById(R.id.recyclerView2);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        transactions.add(new Transaction("Payment1",800,"note 1"));
+        transactions.add(new Transaction("Payment2",500,"note 2"));
+        transactions.add(new Transaction("Payment3",400,"note 3"));
+        transactions.add(new Transaction("Payment4",500,"note 4"));
+        transactions.add(new Transaction("Payment5",600,"note 5"));
+
+        RecyclerTransactionAdapter adapter = new RecyclerTransactionAdapter(this,transactions);
+        recyclerView.setAdapter(adapter);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
