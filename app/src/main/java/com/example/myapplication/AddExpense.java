@@ -56,17 +56,11 @@ public class AddExpense extends AppCompatActivity  {
         AutoCompleteTextView editTextFilledExposedDropdown = findViewById(R.id.filled_exposed_dropdown);
         editTextFilledExposedDropdown.setAdapter(adapter);
 
-        editTextFilledExposedDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                category = categories[i];
-                Toast.makeText(AddExpense.this, ""+category, Toast.LENGTH_SHORT).show();
-            }
+        editTextFilledExposedDropdown.setOnItemClickListener((parent, view, position, id) -> {
+            category = (String) parent.getItemAtPosition(position);
+            System.out.println("selected item is : "+category);
+            Toast.makeText(this, "selected item is : "+category, Toast.LENGTH_SHORT).show();
 
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-                Toast.makeText(AddExpense.this, ""+category, Toast.LENGTH_SHORT).show();
-            }
         });
 
 

@@ -12,18 +12,24 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public class MainAcitvity extends AppCompatActivity {
+public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     ActivityMainAcitvityBinding binding;
     private ExpenseAdapter expenseAdapter;
+    Intent intent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainAcitvityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        expenseAdapter = new ExpenseAdapter(this);
+        expenseAdapter = new ExpenseAdapter(this,this);
         RecyclerView recyclerView = findViewById(R.id.recyclerView1);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
@@ -31,7 +37,7 @@ public class MainAcitvity extends AppCompatActivity {
 
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
-        Intent intent=new Intent(this, AddExpense.class);
+        intent=new Intent(this, AddExpense.class);
         circular_add_button.setOnClickListener(view -> startActivity(intent));
 
     }
@@ -60,17 +66,38 @@ public class MainAcitvity extends AppCompatActivity {
     private void getData() {
         FirebaseFirestore.getInstance()
                 .collection("expenses")
-                .whereEqualTo("uid",FirebaseAuth.getInstance().getUid())
+                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     expenseAdapter.clear();
                     List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
-                    for (DocumentSnapshot ds:dsList){
+                    List<ExpenseModel> expenseModels = new ArrayList<>();
+
+                    for (DocumentSnapshot ds : dsList) {
                         ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
+                        expenseModels.add(expenseModel);
+                    }
+
+                    // Sort the expenseModels list based on the timestamp
+                    Collections.sort(expenseModels, (expense1, expense2) -> {
+                        long time1 = expense1.getTime();
+                        long time2 = expense2.getTime();
+                        return Long.compare(time2, time1); // Sorting in descending order
+                    });
+
+                    // Add the sorted expenseModels to the adapter
+                    for (ExpenseModel expenseModel : expenseModels) {
                         expenseAdapter.add(expenseModel);
                     }
                 });
     }
+
+    @Override
+    public void onClick(ExpenseModel expenseModel) {
+        intent.putExtra("model",expenseModel);
+        startActivity(intent);
+    }
+
 }
 
 

@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
-public class ExpenseModel {
+import java.io.Serializable;
+
+public class ExpenseModel implements Serializable {
 
     private String expenseId;
     private String title;
@@ -11,7 +13,6 @@ public class ExpenseModel {
     private long time;
     private String uid;
 
-
     public ExpenseModel(String expenseId, String title, long amount, String category, String type, String note, long time, String uid) {
         this.expenseId = expenseId;
         this.title = title;
@@ -21,6 +22,9 @@ public class ExpenseModel {
         this.note = note;
         this.time = time;
         this.uid = uid;
+    }
+
+    public ExpenseModel() {
     }
 
     public String getExpenseId() {

@@ -1,5 +1,6 @@
 package com.example.myapplication;
 import android.content.Context;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,17 +9,22 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHolder> {
 
 
     private Context context;
+    private OnItemsClick onItemsClick;
     private List<ExpenseModel> expenseModelList;
 
-    public ExpenseAdapter(Context context){
+    public ExpenseAdapter(Context context, OnItemsClick onItemsClick){
         this.context = context;
+        this.onItemsClick = onItemsClick;
         expenseModelList = new ArrayList<>();
 
     }
@@ -45,7 +51,21 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         ExpenseModel expenseModel = expenseModelList.get(position);
         holder.note.setText(expenseModel.getNote());
         holder.title.setText(expenseModel.getTitle());
-        holder.amount.setText(String.valueOf(expenseModel.getAmount()));
+
+        // Create a NumberFormat instance for Indian Rupees
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        numberFormat.setCurrency(Currency.getInstance("INR"));
+
+        // Format the amount as Indian Rupees
+        String rupees = numberFormat.format(expenseModel.getAmount());
+        holder.amount.setText(rupees);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemsClick.onClick(expenseModel);
+            }
+        });
 
     }
 
