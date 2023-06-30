@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -21,10 +22,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.Calendar;
 import java.util.UUID;
 
-public class AddExpense extends AppCompatActivity {
+public class AddExpense extends AppCompatActivity  {
+
+//    implements AdapterView.OnItemSelectedListener
 
     ActivityAddExpenseBinding binding;
-    public String type;
+    String type;
+    String category;
+    String[] categories = new String[] {"Utilities", "Borrow", "Payment", "Party","Miscellaneous"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,19 +39,9 @@ public class AddExpense extends AppCompatActivity {
 
         binding.incomeRadio.setChecked(true);
 
-        binding.incomeRadio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                type = "Income";
-            }
-        });
+        binding.incomeRadio.setOnClickListener(view -> type = "Income");
 
-        binding.expenseRadio.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                type = "Expense";
-            }
-        });
+        binding.expenseRadio.setOnClickListener(view -> type = "Expense");
 
 
 
@@ -55,33 +51,32 @@ public class AddExpense extends AppCompatActivity {
         Button ok_btn = findViewById(R.id.ok_button);
 
 
-        String[] type = new String[] {"Utilities", "Borrow", "Payment", "Party","Miscellaneous"};
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, type);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, categories);
 
         AutoCompleteTextView editTextFilledExposedDropdown = findViewById(R.id.filled_exposed_dropdown);
         editTextFilledExposedDropdown.setAdapter(adapter);
 
+        editTextFilledExposedDropdown.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                category = categories[i];
+                Toast.makeText(AddExpense.this, ""+category, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+                Toast.makeText(AddExpense.this, ""+category, Toast.LENGTH_SHORT).show();
+            }
+        });
+
 
         Intent intent_main =new Intent(this,MainAcitvity.class);
 
-        cancel_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                createExpense();
+        cancel_btn.setOnClickListener(view -> startActivity(intent_main));
 
-                startActivity(intent_main);
-            }
-
-
-        });
-
-        ok_btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                startActivity(intent_main);
-            }
+        ok_btn.setOnClickListener(view -> {
+            createExpense();
+            startActivity(intent_main);
         });
 
 
@@ -90,6 +85,18 @@ public class AddExpense extends AppCompatActivity {
 
     }
 
+//
+//    @Override
+//    public void onItemSelected(AdapterView<?> adapter, View view, int i, long l) {
+//        category = categories[i];
+//        Toast.makeText(this, ""+categories[i], Toast.LENGTH_SHORT).show();
+//    }
+//
+//    @Override
+//    public void onNothingSelected(AdapterView<?> adapterView) {
+//
+//    }
+
     private void createExpense() {
 
         String expenseId = UUID.randomUUID().toString();
@@ -97,11 +104,7 @@ public class AddExpense extends AppCompatActivity {
         String amount = binding.enterAmount.getText().toString();
         String type ;
         String note = binding.enterNote.getText().toString();
-
-        String category = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            category = findViewById(R.id.filled_exposed_dropdown).getAutofillValue().toString();
-        }
+//        category = null;
         boolean incomeChecked = binding.incomeRadio.isChecked();
 
         if(incomeChecked){
@@ -115,7 +118,7 @@ public class AddExpense extends AppCompatActivity {
             return;
         }
 
-        ExpenseModel expenseModel = new ExpenseModel(expenseId,title,Long.parseLong(amount),type,note,category,Calendar.getInstance().getTimeInMillis());
+        ExpenseModel expenseModel = new ExpenseModel(expenseId,title,Long.parseLong(amount),category,type,note,Calendar.getInstance().getTimeInMillis(),FirebaseAuth.getInstance().getUid());
 
         FirebaseFirestore
                 .getInstance()

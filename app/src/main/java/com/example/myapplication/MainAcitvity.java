@@ -5,11 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
@@ -18,17 +16,24 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainAcitvity extends AppCompatActivity {
     ActivityMainAcitvityBinding binding;
+    private ExpenseAdapter expenseAdapter;
 ArrayList<ExpenseModel> expenses = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityMainAcitvityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        expenseAdapter = new ExpenseAdapter(this);
 
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView1);
@@ -40,8 +45,7 @@ ArrayList<ExpenseModel> expenses = new ArrayList<>();
 //        transactions.add(new Transaction("Payment4",500,"note 4"));
 //        transactions.add(new Transaction("Payment5",600,"note 5"));
 
-        RecyclerTransactionAdapter adapter = new RecyclerTransactionAdapter(this,expenses);
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(expenseAdapter);
 
 
 
@@ -79,6 +83,30 @@ ArrayList<ExpenseModel> expenses = new ArrayList<>();
                         }
                     });
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getData();
+    }
+
+    private void getData() {
+        FirebaseFirestore.getInstance()
+                .collection("expenses")
+                .whereEqualTo("uid",FirebaseAuth.getInstance().getUid())
+                .get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        expenseAdapter.clear();
+                        List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
+                        for (DocumentSnapshot ds:dsList){
+                            ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
+                            expenseAdapter.add(expenseModel);
+                        }
+                    }
+                });
     }
 }
 

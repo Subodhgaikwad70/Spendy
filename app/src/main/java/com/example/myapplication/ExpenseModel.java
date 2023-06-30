@@ -9,9 +9,10 @@ public class ExpenseModel {
     private String type;
     private String note;
     private long time;
+    private String uid;
 
 
-    public ExpenseModel(String expenseId, String title, long amount, String category, String type, String note, long time) {
+    public ExpenseModel(String expenseId, String title, long amount, String category, String type, String note, long time, String uid) {
         this.expenseId = expenseId;
         this.title = title;
         this.amount = amount;
@@ -19,6 +20,7 @@ public class ExpenseModel {
         this.type = type;
         this.note = note;
         this.time = time;
+        this.uid = uid;
     }
 
     public String getExpenseId() {
@@ -75,5 +77,13 @@ public class ExpenseModel {
 
     public void setTime(long time) {
         this.time = time;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 }

@@ -31,7 +31,7 @@ public class Transactions extends AppCompatActivity {
 //        transactions.add(new Transaction("Payment4",500,"note 4"));
 //        transactions.add(new Transaction("Payment5",600,"note 5"));
 
-        RecyclerTransactionAdapter adapter = new RecyclerTransactionAdapter(this,expenses);
+        ExpenseAdapter adapter = new ExpenseAdapter(this);
         recyclerView.setAdapter(adapter);
     }
 }
