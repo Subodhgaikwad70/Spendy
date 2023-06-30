@@ -12,9 +12,9 @@ import java.util.ArrayList;
 
 public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTransactionAdapter.ViewHolder> {
     Context context;
-    ArrayList<Transaction> transactions;
+    ArrayList<ExpenseModel> transactions;
 
-    RecyclerTransactionAdapter(Context context, ArrayList<Transaction> transactions){
+    RecyclerTransactionAdapter(Context context, ArrayList<ExpenseModel> transactions){
         this.context = context;
         this.transactions = transactions;
 
@@ -33,9 +33,9 @@ public class RecyclerTransactionAdapter extends RecyclerView.Adapter<RecyclerTra
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.title.setText(transactions.get(position).transaction_title);
-        holder.amount.setText("Rs "+transactions.get(position).amount);
-        holder.note.setText(transactions.get(position).note);
+//        holder.title.setText(transactions.get(position).title);
+//        holder.amount.setText("Rs "+transactions.get(position).amount);
+//        holder.note.setText(transactions.get(position).note);
 
     }
 
