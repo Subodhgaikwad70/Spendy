@@ -24,13 +24,6 @@ public class Transactions extends AppCompatActivity {
 
         RecyclerView recyclerView = findViewById(R.id.recyclerView2);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-//
-//        transactions.add(new Transaction("Payment1",800,"note 1"));
-//        transactions.add(new Transaction("Payment2",500,"note 2"));
-//        transactions.add(new Transaction("Payment3",400,"note 3"));
-//        transactions.add(new Transaction("Payment4",500,"note 4"));
-//        transactions.add(new Transaction("Payment5",600,"note 5"));
-
         ExpenseAdapter adapter = new ExpenseAdapter(this);
         recyclerView.setAdapter(adapter);
     }
