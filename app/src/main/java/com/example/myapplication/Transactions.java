@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,7 +23,6 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
     Intent intent;
 
-    ArrayList<ExpenseModel> expenses = new ArrayList<>();
     private ExpenseAdapter expenseAdapter;
 
     @Override
@@ -33,10 +34,15 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
         RecyclerView recyclerView = findViewById(R.id.recyclerView2);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
     }
 
     @Override
     public void onClick(ExpenseModel expenseModel) {
+        intent = new Intent(Transactions.this,AddExpense.class);
         intent.putExtra("model",expenseModel);
         startActivity(intent);
     }
@@ -90,6 +96,43 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                     }
                 });
     }
+
+
+    ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            // Not used in this case, return false
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+
+
+            switch (direction){
+                case ItemTouchHelper.LEFT:
+                    break;
+
+                case ItemTouchHelper.RIGHT:
+                    ExpenseModel deletedExpenseModel;
+                    deletedExpenseModel = expenseAdapter.getItem(position);
+                    deleteExpense(deletedExpenseModel);
+                    expenseAdapter.notifyItemRemoved(position);
+                    break;
+            }
+        }
+    };
+
+
+    private void deleteExpense(ExpenseModel expenseModel){
+        FirebaseFirestore
+                .getInstance()
+                .document(expenseModel.getExpenseId())
+                .delete();
+        finish();
+    }
+
 
 }
 

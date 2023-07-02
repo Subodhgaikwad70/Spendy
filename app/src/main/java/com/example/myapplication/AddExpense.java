@@ -1,32 +1,24 @@
 package com.example.myapplication;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.Toast;
-
 import com.example.myapplication.databinding.ActivityAddExpenseBinding;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.Calendar;
 import java.util.UUID;
 
 public class AddExpense extends AppCompatActivity  {
 
-//    implements AdapterView.OnItemSelectedListener
 
+    private ExpenseModel expenseModel;
     ActivityAddExpenseBinding binding;
     String type;
     String category;
@@ -34,19 +26,33 @@ public class AddExpense extends AppCompatActivity  {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         binding = ActivityAddExpenseBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.incomeRadio.setChecked(true);
+        expenseModel = (ExpenseModel) getIntent().getSerializableExtra("model");
+
+        if( expenseModel!=null ){
+            binding.enterTitle.setText(expenseModel.getTitle());
+            binding.enterAmount.setText(String.valueOf(expenseModel.getAmount()));
+            binding.enterNote.setText(expenseModel.getNote());
+            binding.filledExposedDropdown.setText(expenseModel.getCategory());
+            if(expenseModel.getType().equals("Income")){
+                binding.incomeRadio.setChecked(true);
+            }else{
+                binding.expenseRadio.setChecked(true);
+            }
+
+            binding.okButton.setText("update");
+        }else{
+            binding.expenseRadio.setChecked(true);
+        }
+
 
         binding.incomeRadio.setOnClickListener(view -> type = "Income");
-
         binding.expenseRadio.setOnClickListener(view -> type = "Expense");
 
-
-
-        // Below is custom code
 
         Button cancel_btn = findViewById(R.id.cancel_button);
         Button ok_btn = findViewById(R.id.ok_button);
@@ -67,32 +73,60 @@ public class AddExpense extends AppCompatActivity  {
 
         Intent intent_main =new Intent(this,MainAcitvity.class);
 
-        cancel_btn.setOnClickListener(view -> startActivity(intent_main));
-
-        ok_btn.setOnClickListener(view -> {
-            createExpense();
+        cancel_btn.setOnClickListener(view -> {
+            expenseModel = null;
             startActivity(intent_main);
         });
 
+        ok_btn.setOnClickListener(view -> {
 
+            if(binding.enterTitle.getText().toString().trim().length() == 0){
+                binding.enterTitle.setError("Required Field");
 
+            }else if(binding.enterAmount.getText().toString().trim().length() == 0){
+                binding.enterAmount.setError("Required Field");
 
+            }else if(binding.filledExposedDropdown.getText().toString().trim().length() == 0){
+                binding.filledExposedDropdown.setError("Required Field");
+            }else{
+                if( expenseModel == null ){
+                    createExpense();
+                }else{
+                    updateExpense();
+                }
+                startActivity(intent_main);
+            }
+        });
 
     }
 
-//
-//    @Override
-//    public void onItemSelected(AdapterView<?> adapter, View view, int i, long l) {
-//        category = categories[i];
-//        Toast.makeText(this, ""+categories[i], Toast.LENGTH_SHORT).show();
-//    }
-//
-//    @Override
-//    public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//    }
-
     private void createExpense() {
+
+        String expenseId = UUID.randomUUID().toString();
+        String title = binding.enterTitle.getText().toString();
+        String amount = binding.enterAmount.getText().toString();
+        String type ;
+        String note = binding.enterNote.getText().toString();
+//        category = null;
+        boolean incomeChecked = binding.incomeRadio.isChecked();
+
+        if(incomeChecked){
+            type = "Income";
+        }else {
+            type = "Expense";
+        }
+
+        ExpenseModel expenseModel = new ExpenseModel(expenseId,title,Long.parseLong(amount),category,type,note,Calendar.getInstance().getTimeInMillis(),FirebaseAuth.getInstance().getUid());
+
+        FirebaseFirestore
+                .getInstance()
+                .collection("expenses")
+                .document(expenseId)
+                .set(expenseModel);
+        finish();
+    }
+
+    private void updateExpense() {
 
         String expenseId = UUID.randomUUID().toString();
         String title = binding.enterTitle.getText().toString();
@@ -108,19 +142,15 @@ public class AddExpense extends AppCompatActivity  {
             type = "Expense";
         }
 
-        if(amount.trim().length()==0){
-            binding.enterAmount.setError("Required Field");
-            return;
-        }
-
-        ExpenseModel expenseModel = new ExpenseModel(expenseId,title,Long.parseLong(amount),category,type,note,Calendar.getInstance().getTimeInMillis(),FirebaseAuth.getInstance().getUid());
+        ExpenseModel model = new ExpenseModel(expenseModel.getExpenseId(),title,Long.parseLong(amount),category,type,note,expenseModel.getTime(),FirebaseAuth.getInstance().getUid());
 
         FirebaseFirestore
                 .getInstance()
                 .collection("expenses")
                 .document(expenseId)
-                .set(expenseModel);
+                .set(model);
         finish();
+        expenseModel = null;
     }
 
 

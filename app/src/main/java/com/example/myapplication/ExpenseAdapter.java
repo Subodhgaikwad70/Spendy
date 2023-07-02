@@ -109,6 +109,11 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         return expenseModelList.size();
     }
 
+    public ExpenseModel getItem(int position) {
+        return expenseModelList.get(position);
+    }
+
+
     public class MyViewHolder extends RecyclerView.ViewHolder{
         private TextView note, title, category, amount, date;
         public MyViewHolder(@NonNull View itemView) {

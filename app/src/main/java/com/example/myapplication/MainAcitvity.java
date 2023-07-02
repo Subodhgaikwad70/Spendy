@@ -60,7 +60,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         });
 
         binding.piechartView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
+
             public boolean onTouch(View v, MotionEvent event) {
                 // Pass the touch event to the GestureDetector
                 gestureDetector.onTouchEvent(event);
