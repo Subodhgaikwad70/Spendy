@@ -85,7 +85,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
             formattedDateTime = timeFormat.format(new Date(timestampInMillis));
         } else if (hoursDifference < 24*365){
             // Represent as date
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM",Locale.getDefault());
+            SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm dd MMM",Locale.getDefault());
             formattedDateTime = dateFormat.format(new Date(timestampInMillis));
         } else {
             // Represent as date

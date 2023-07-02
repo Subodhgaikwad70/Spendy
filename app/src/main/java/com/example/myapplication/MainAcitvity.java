@@ -34,7 +34,6 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
-
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
         intent=new Intent(this, AddExpense.class);
