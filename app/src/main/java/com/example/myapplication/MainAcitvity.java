@@ -6,6 +6,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.View;
 import android.widget.Toast;
 import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -22,6 +25,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     ActivityMainAcitvityBinding binding;
     private ExpenseAdapter expenseAdapter;
     Intent intent;
+    private GestureDetector gestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +42,31 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
         intent=new Intent(this, AddExpense.class);
         circular_add_button.setOnClickListener(view -> startActivity(intent));
+
+        // ...
+        gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                // Calculate the swipe direction based on the Y coordinates of the MotionEvent objects
+                float deltaY = e2.getY() - e1.getY();
+                if (deltaY < 0) {
+                    // Swiped from bottom to top (swipe up)
+                    // Start the new activity here
+                    startActivity(new Intent(MainAcitvity.this, Transactions.class));
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        binding.piechartView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // Pass the touch event to the GestureDetector
+                gestureDetector.onTouchEvent(event);
+                return true;
+            }
+        });
 
     }
 

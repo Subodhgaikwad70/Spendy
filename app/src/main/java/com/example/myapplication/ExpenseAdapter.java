@@ -1,5 +1,6 @@
 package com.example.myapplication;
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.firebase.database.collection.LLRBNode;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -61,6 +64,11 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
 
         // Format the amount as Indian Rupees
         String rupees = numberFormat.format(expenseModel.getAmount());
+        if (expenseModel.getType().equals("Expense")) {
+            holder.amount.setTextColor(Color.RED);
+        } else {
+            holder.amount.setTextColor(Color.GREEN);
+        }
         holder.amount.setText(rupees);
 
         holder.itemView.setOnClickListener(view -> onItemsClick.onClick(expenseModel));

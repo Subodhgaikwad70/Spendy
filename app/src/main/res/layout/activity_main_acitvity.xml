@@ -63,7 +63,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView2"
+        android:id="@+id/piechart_view"
         android:layout_width="360dp"
         android:layout_height="200dp"
         android:layout_marginTop="16dp"
