@@ -22,7 +22,7 @@ public class AddExpense extends AppCompatActivity  {
     ActivityAddExpenseBinding binding;
     String type;
     String category;
-    String[] categories = new String[] {"Utilities", "Borrow", "Payment", "Party","Miscellaneous"};
+    String[] categories = new String[] {"Utilities", "Borrow", "Payment", "Food and Dinning","Travel","Shopping","Entertainment","Groceries","Miscellaneous"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,11 +71,9 @@ public class AddExpense extends AppCompatActivity  {
         });
 
 
-        Intent intent_main =new Intent(this,MainAcitvity.class);
-
         cancel_btn.setOnClickListener(view -> {
             expenseModel = null;
-            startActivity(intent_main);
+            finish();
         });
 
         ok_btn.setOnClickListener(view -> {
@@ -94,7 +92,7 @@ public class AddExpense extends AppCompatActivity  {
                 }else{
                     updateExpense();
                 }
-                startActivity(intent_main);
+                finish();
             }
         });
 

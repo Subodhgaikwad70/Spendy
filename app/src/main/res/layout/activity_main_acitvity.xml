@@ -18,7 +18,7 @@
         android:textAlignment="center"
         app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/cardView2"
+        app:layout_constraintBottom_toTopOf="@+id/piechart_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -66,7 +66,7 @@
         android:id="@+id/piechart_view"
         android:layout_width="360dp"
         android:layout_height="200dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:foregroundGravity="center"
         android:textAlignment="center"
         app:cardCornerRadius="20dp"
@@ -97,16 +97,16 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView1"
-        android:layout_width="409dp"
-        android:layout_height="420dp"
-        android:layout_marginTop="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="8dp"
         android:foregroundGravity="center_horizontal"
         android:orientation="vertical"
         android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cardView2" >
+        app:layout_constraintTop_toBottomOf="@+id/piechart_view">
 
     </androidx.recyclerview.widget.RecyclerView>
 
