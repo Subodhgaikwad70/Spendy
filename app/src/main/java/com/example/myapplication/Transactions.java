@@ -117,6 +117,8 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                 case ItemTouchHelper.RIGHT:
                     ExpenseModel deletedExpenseModel;
                     deletedExpenseModel = expenseAdapter.getItem(position);
+                    System.out.println(deletedExpenseModel.getExpenseId());
+                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
                     deleteExpense(deletedExpenseModel);
                     expenseAdapter.notifyItemRemoved(position);
                     break;
@@ -128,6 +130,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     private void deleteExpense(ExpenseModel expenseModel){
         FirebaseFirestore
                 .getInstance()
+                .collection("expenses")
                 .document(expenseModel.getExpenseId())
                 .delete();
         finish();
