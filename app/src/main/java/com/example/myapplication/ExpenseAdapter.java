@@ -10,10 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHolder> {
 
@@ -60,13 +63,36 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         String rupees = numberFormat.format(expenseModel.getAmount());
         holder.amount.setText(rupees);
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                onItemsClick.onClick(expenseModel);
-            }
-        });
+        holder.itemView.setOnClickListener(view -> onItemsClick.onClick(expenseModel));
+        holder.date.setText(formatTime(expenseModel.getTime()));
 
+
+    }
+
+    public String formatTime(long time){
+        //
+        long timestampInMillis = time; // Replace with your timestamp in milliseconds
+
+        long currentTimeInMillis = System.currentTimeMillis();
+        long differenceInMillis = currentTimeInMillis - timestampInMillis;
+        long hoursDifference = TimeUnit.MILLISECONDS.toHours(differenceInMillis);
+
+        String formattedDateTime;
+
+        if (hoursDifference < 24) {
+            // Represent as time
+            SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm", Locale.getDefault());
+            formattedDateTime = timeFormat.format(new Date(timestampInMillis));
+        } else if (hoursDifference < 24*365){
+            // Represent as date
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMM",Locale.getDefault());
+            formattedDateTime = dateFormat.format(new Date(timestampInMillis));
+        } else {
+            // Represent as date
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MM yyyy",Locale.getDefault());
+            formattedDateTime = dateFormat.format(new Date(timestampInMillis));
+        }
+        return formattedDateTime;
     }
 
     @Override
