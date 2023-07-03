@@ -2,17 +2,27 @@ package com.example.myapplication;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 import com.example.myapplication.databinding.ActivityAddExpenseBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Calendar;
+import java.util.Currency;
+import java.util.Locale;
 import java.util.UUID;
 
 public class AddExpense extends AppCompatActivity  {
@@ -32,6 +42,8 @@ public class AddExpense extends AppCompatActivity  {
         setContentView(binding.getRoot());
 
         expenseModel = (ExpenseModel) getIntent().getSerializableExtra("model");
+
+
 
         if( expenseModel!=null ){
             binding.enterTitle.setText(expenseModel.getTitle());
@@ -88,9 +100,38 @@ public class AddExpense extends AppCompatActivity  {
                 }else{
                     updateExpense();
                 }
+
+                Intent expense_view_intent = new Intent(this, ExpenseView.class);
+                expense_view_intent.putExtra("model",expenseModel);
                 finish();
             }
         });
+
+//        binding.enterAmount.addTextChangedListener(new TextWatcher() {
+//            private DecimalFormat decimalFormat = new DecimalFormat("#,##,##,###");
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//                // This method is called before the text is changed
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                // This method is called when the text is being changed
+//                String newText = s.toString(); // Get the updated text
+//                // Perform any required text manipulation or processing
+////                String modifiedText = newText.toUpperCase(); // Example: convert text to uppercase
+//
+//                String modifiedText = decimalFormat.format(Integer.parseInt(newText));
+//                binding.enterAmount.setText(modifiedText); // Update the text in the EditText
+//                binding.enterAmount.setSelection(modifiedText.length()); // Set the cursor position to the end
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//                // This method is called after the text has been changed
+//            }
+//        });
+
 
     }
 
@@ -98,7 +139,6 @@ public class AddExpense extends AppCompatActivity  {
     public void onBackPressed() {
         // Perform your desired functionality here
         expenseModel = null;
-
         super.onBackPressed();
     }
 
@@ -122,7 +162,7 @@ public class AddExpense extends AppCompatActivity  {
 
         FirebaseFirestore
                 .getInstance()
-                .collection("expenses")
+                .collection(FirebaseAuth.getInstance().getUid())
                 .document(expenseId)
                 .set(expenseModel);
         finish();
@@ -130,7 +170,6 @@ public class AddExpense extends AppCompatActivity  {
 
     private void updateExpense() {
 
-        String expenseId = UUID.randomUUID().toString();
         String title = binding.enterTitle.getText().toString();
         String amount = binding.enterAmount.getText().toString();
         String type ;
@@ -144,13 +183,20 @@ public class AddExpense extends AppCompatActivity  {
             type = "Expense";
         }
 
+
         ExpenseModel model = new ExpenseModel(expenseModel.getExpenseId(),title,Long.parseLong(amount),category,type,note,expenseModel.getTime(),FirebaseAuth.getInstance().getUid());
+
+        MainAcitvity mainAcitvity = new MainAcitvity();
+        mainAcitvity.deleteExpense(expenseModel);
+
 
         FirebaseFirestore
                 .getInstance()
-                .collection("expenses")
-                .document(expenseId)
+                .collection(FirebaseAuth.getInstance().getUid())
+                .document(expenseModel.getExpenseId())
                 .set(model);
+
+//        mainAcitvity.getData();
         finish();
         expenseModel = null;
     }

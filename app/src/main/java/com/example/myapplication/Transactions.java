@@ -52,9 +52,11 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
     @Override
     public void onClick(ExpenseModel expenseModel) {
-        intent = new Intent(Transactions.this,AddExpense.class);
-        intent.putExtra("model",expenseModel);
-        startActivity(intent);
+
+        Intent intent_expense_view = new Intent(Transactions.this,ExpenseView.class);
+        intent_expense_view.putExtra("model",expenseModel);
+        startActivity(intent_expense_view);
+
     }
 
     @Override
@@ -80,7 +82,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
     private void getData() {
         FirebaseFirestore.getInstance()
-                .collection("expenses")
+                .collection(FirebaseAuth.getInstance().getUid())
                 .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -129,7 +131,8 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                     deletedExpenseModel = expenseAdapter.getItem(position);
 //                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
                     expenseAdapter.removeItem(position);
-                    deleteExpense(deletedExpenseModel);
+                    MainAcitvity mainAcitvity = new MainAcitvity();
+                    mainAcitvity.deleteExpense(deletedExpenseModel);
                     expenseAdapter.notifyItemRemoved(position);
 
                     // Show the Snackbar with an undo action
@@ -142,7 +145,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         expenseAdapter.notifyItemInserted(position);
                         FirebaseFirestore
                                 .getInstance()
-                                .collection("expenses")
+                                .collection(FirebaseAuth.getInstance().getUid())
                                 .document(deletedExpenseModel.getExpenseId())
                                 .set(deletedExpenseModel);
                     });
@@ -151,16 +154,6 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
             }
         }
     };
-
-
-    private void deleteExpense(ExpenseModel expenseModel){
-        FirebaseFirestore
-                .getInstance()
-                .collection("expenses")
-                .document(expenseModel.getExpenseId())
-                .delete();
-    }
-
 
 }
 

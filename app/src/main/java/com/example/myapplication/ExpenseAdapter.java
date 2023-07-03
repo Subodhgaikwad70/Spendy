@@ -113,12 +113,17 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         return expenseModelList.get(position);
     }
 
+
     public void removeItem(int position) {
         expenseModelList.remove(position);
     }
 
     public void insertItem(ExpenseModel deletedExpenseModel, int position) {
         expenseModelList.add(position,deletedExpenseModel);
+    }
+
+    public List<ExpenseModel> getExpenseModelsList() {
+        return expenseModelList;
     }
 
 

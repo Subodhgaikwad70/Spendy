@@ -12,6 +12,12 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor">@color/page_background</item>
         <!-- Customize your theme here. -->
+<!--        <item name="pageBackground">@color/page_background_night</item>-->
+
+        <!-- This is for enabling transitions  -->
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowEnterTransition">@transition/trans_anim</item>
+        <item name="android:windowExitTransition">@transition/trans_anim</item>
     </style>
 
 </resources>

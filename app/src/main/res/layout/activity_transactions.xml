@@ -89,7 +89,7 @@
             android:layout_margin="8dp"
             android:layout_marginStart="32dp"
             android:layout_marginBottom="8dp"
-            android:text="Filter"
+            android:text="Sort"
             android:textAlignment="center"
             android:textSize="20sp"
             android:textStyle="bold"

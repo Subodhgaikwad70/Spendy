@@ -17,6 +17,7 @@
             android:exported="false" />
         <activity
             android:name=".AddExpense"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".Transactions"

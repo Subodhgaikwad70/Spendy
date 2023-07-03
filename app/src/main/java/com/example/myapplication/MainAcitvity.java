@@ -6,12 +6,14 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -21,6 +23,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,9 +51,11 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
+
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
         intent=new Intent(this, AddExpense.class);
+
         circular_add_button.setOnClickListener(view -> {
             ExpenseModel expenseModel=null;
             intent.putExtra("model",expenseModel);
@@ -67,7 +72,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 if (deltaY < 0) {
                     // Swiped from bottom to top (swipe up)
                     // Start the new activity here
-                    startActivity(new Intent(MainAcitvity.this, Transactions.class));
+                    Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+                    startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
                     return true;
                 }
                 return false;
@@ -111,9 +117,11 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         getData();
     }
 
-    private void getData() {
+    public void getData() {
+        income =0;
+        expense = 0;
         FirebaseFirestore.getInstance()
-                .collection("expenses")
+                .collection(FirebaseAuth.getInstance().getUid())
                 .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -157,15 +165,20 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                         expenseAdapter.add(expenseModel);
                     }
                 });
+//        expenseAdapter.notifyDataSetChanged();
+
+//        Intent transaction_intent = new Intent(this,Transactions.class);
+//        List<ExpenseModel> expenseModelsList = new ArrayList<>();
+//        expenseModelsList = expenseAdapter.getExpenseModelsList();
+//        transaction_intent.putExtra("adapter", (Serializable) expenseModelsList);
     }
 
     @Override
     public void onClick(ExpenseModel expenseModel) {
-        intent.putExtra("model",expenseModel);
-        startActivity(intent);
+        Intent expense_view_intent = new Intent(MainAcitvity.this,ExpenseView.class);
+        expense_view_intent.putExtra("model",expenseModel);
+        startActivity(expense_view_intent);
     }
-
-
 
 
     ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -202,10 +215,13 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                         expenseAdapter.notifyItemInserted(position);
                         FirebaseFirestore
                                 .getInstance()
-                                .collection("expenses")
+                                .collection(FirebaseAuth.getInstance().getUid())
                                 .document(deletedExpenseModel.getExpenseId())
                                 .set(deletedExpenseModel);
+                        changeTotal(deletedExpenseModel);
+                        getData();
                     });
+                    snackbar.setDuration(3000);
                     snackbar.show();
                     break;
             }
@@ -214,14 +230,46 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
 
 
-    private void deleteExpense(ExpenseModel expenseModel){
+    public void deleteExpense(ExpenseModel expenseModel){
         FirebaseFirestore
                 .getInstance()
-                .collection("expenses")
+                .collection(FirebaseAuth.getInstance().getUid())
                 .document(expenseModel.getExpenseId())
                 .delete();
-    }
 
+//        getData();
+//        TextView totalspendview = findViewById(R.id.totalSpend);
+//        String totalspend = totalspendview.getText().toString();
+//        totalspend = totalspend.replace("₹", "").replace(",", "");
+//        double updatedspend=0;
+//        if(expenseModel.getType().equals("Income")){
+//            updatedspend = Double.parseDouble(totalspend) - expenseModel.getAmount();
+//        }else{
+//            updatedspend = Double.parseDouble(totalspend) + expenseModel.getAmount();
+//        }
+//
+//        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+//        numberFormat.setCurrency(Currency.getInstance("INR"));
+//        String rupees = numberFormat.format(updatedspend);
+//        binding.totalSpend.setText(rupees);
+    }
+    void changeTotal(ExpenseModel expenseModel){
+
+        TextView totalspendview = findViewById(R.id.totalSpend);
+        String totalspend = totalspendview.getText().toString();
+        totalspend = totalspend.replace("₹", "").replace(",", "");
+        double updatedspend=0;
+        if(expenseModel.getType().equals("Income")){
+            updatedspend = Double.parseDouble(totalspend) - expenseModel.getAmount();
+        }else{
+            updatedspend = Double.parseDouble(totalspend) + expenseModel.getAmount();
+        }
+
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        numberFormat.setCurrency(Currency.getInstance("INR"));
+        String rupees = numberFormat.format(updatedspend);
+        binding.totalSpend.setText(rupees);
+    }
 
 }
 
