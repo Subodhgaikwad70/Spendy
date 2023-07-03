@@ -30,7 +30,6 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     Intent intent;
 
     private ExpenseAdapter expenseAdapter;
-    CoordinatorLayout mSnackbarLayout;
     RecyclerView recyclerView;
     ActivityTransactionsBinding binding;
 
@@ -39,10 +38,10 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
         super.onCreate(savedInstanceState);
         ActivityTransactionsBinding binding = ActivityTransactionsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-//        setContentView(R.layout.activity_transactions);
+
 
         expenseAdapter = new ExpenseAdapter(this,this);
-        recyclerView = findViewById(R.id.recyclerView2);
+        recyclerView = binding.recyclerView2;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 

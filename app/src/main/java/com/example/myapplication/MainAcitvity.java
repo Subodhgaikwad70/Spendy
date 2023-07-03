@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Toast;
 import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -34,6 +35,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     private GestureDetector gestureDetector;
     private long income = 0, expense=0;
 
+    RecyclerView recyclerView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +44,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         setContentView(binding.getRoot());
 
         expenseAdapter = new ExpenseAdapter(this,this);
-        RecyclerView recyclerView = findViewById(R.id.recyclerView1);
+        recyclerView = binding.recyclerView1;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
@@ -164,6 +167,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
 
 
+
     ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
         @Override
         public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -183,14 +187,31 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 case ItemTouchHelper.RIGHT:
                     ExpenseModel deletedExpenseModel;
                     deletedExpenseModel = expenseAdapter.getItem(position);
-//                    Toast.makeText(MainAcitvity.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
-                    deleteExpense(deletedExpenseModel);
+//                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
                     expenseAdapter.removeItem(position);
+                    deleteExpense(deletedExpenseModel);
                     expenseAdapter.notifyItemRemoved(position);
+
+                    // Show the Snackbar with an undo action
+                    Snackbar snackbar = Snackbar.make(recyclerView, ""+deletedExpenseModel.getTitle()+" is deleted !", Snackbar.LENGTH_LONG);
+                    snackbar.setAction("Undo", v -> {
+                        // Handle the undo action here
+
+                        // For example, to restore the deleted item:
+                        expenseAdapter.insertItem(deletedExpenseModel,position);
+                        expenseAdapter.notifyItemInserted(position);
+                        FirebaseFirestore
+                                .getInstance()
+                                .collection("expenses")
+                                .document(deletedExpenseModel.getExpenseId())
+                                .set(deletedExpenseModel);
+                    });
+                    snackbar.show();
                     break;
             }
         }
     };
+
 
 
     private void deleteExpense(ExpenseModel expenseModel){
