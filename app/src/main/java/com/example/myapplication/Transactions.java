@@ -2,15 +2,21 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.renderscript.ScriptGroup;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.example.myapplication.databinding.ActivityAddExpenseBinding;
+import com.example.myapplication.databinding.ActivityTransactionsBinding;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,11 +30,16 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     Intent intent;
 
     private ExpenseAdapter expenseAdapter;
+    CoordinatorLayout mSnackbarLayout;
+
+    ActivityTransactionsBinding binding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_transactions);
+        ActivityTransactionsBinding binding = ActivityTransactionsBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+//        setContentView(R.layout.activity_transactions);
 
         expenseAdapter = new ExpenseAdapter(this,this);
         RecyclerView recyclerView = findViewById(R.id.recyclerView2);
@@ -117,10 +128,24 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                 case ItemTouchHelper.RIGHT:
                     ExpenseModel deletedExpenseModel;
                     deletedExpenseModel = expenseAdapter.getItem(position);
-                    System.out.println(deletedExpenseModel.getExpenseId());
-                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
                     deleteExpense(deletedExpenseModel);
+                    expenseAdapter.removeItem(position);
                     expenseAdapter.notifyItemRemoved(position);
+
+                    // Show the Snackbar with an undo action
+                    Snackbar snackbar = Snackbar.make(binding.recyclerView2, ""+deletedExpenseModel.getTitle().toString()+" is deleted !", Snackbar.LENGTH_LONG);
+                    snackbar.setAction("Undo", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Handle the undo action here
+
+                            // For example, to restore the deleted item:
+                            expenseAdapter.insertItem(deletedExpenseModel,position);
+                            expenseAdapter.notifyItemInserted(position);
+                        }
+                    });
+                    snackbar.show();
                     break;
             }
         }
@@ -133,7 +158,6 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                 .collection("expenses")
                 .document(expenseModel.getExpenseId())
                 .delete();
-        finish();
     }
 
 

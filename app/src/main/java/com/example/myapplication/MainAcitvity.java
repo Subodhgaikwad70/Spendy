@@ -1,10 +1,13 @@
 package com.example.myapplication;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -17,15 +20,19 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     ActivityMainAcitvityBinding binding;
     private ExpenseAdapter expenseAdapter;
     Intent intent;
     private GestureDetector gestureDetector;
+    private long income = 0, expense=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +48,12 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
         intent=new Intent(this, AddExpense.class);
-        circular_add_button.setOnClickListener(view -> startActivity(intent));
+        circular_add_button.setOnClickListener(view -> {
+            ExpenseModel expenseModel=null;
+            intent.putExtra("model",expenseModel);
+            startActivity(intent);
+
+        });
 
         // ...
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
@@ -68,6 +80,9 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
             }
         });
 
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
+
     }
 
     @Override
@@ -88,6 +103,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     @Override
     protected void onResume() {
         super.onResume();
+        income =0;
+        expense = 0;
         getData();
     }
 
@@ -115,6 +132,25 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
                     // Add the sorted expenseModels to the adapter
                     for (ExpenseModel expenseModel : expenseModels) {
+                        if (expenseModel.getType().equals("Income")){
+                            income+=expenseModel.getAmount();
+                        }else{
+                            expense+=expenseModel.getAmount();
+                        }
+                        long total = income-expense;
+
+                        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+                        numberFormat.setCurrency(Currency.getInstance("INR"));
+
+                        // Format the amount as Indian Rupees
+                        String rupees = numberFormat.format(total);
+                        binding.totalSpend.setText(""+rupees);
+
+                        if (expense > income) {
+                            binding.totalSpend.setTextColor(Color.RED);
+                        } else {
+                            binding.totalSpend.setTextColor(Color.GREEN);
+                        }
                         expenseAdapter.add(expenseModel);
                     }
                 });
@@ -125,6 +161,46 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         intent.putExtra("model",expenseModel);
         startActivity(intent);
     }
+
+
+
+    ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            // Not used in this case, return false
+            return false;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int position = viewHolder.getAdapterPosition();
+
+
+            switch (direction){
+                case ItemTouchHelper.LEFT:
+                    break;
+
+                case ItemTouchHelper.RIGHT:
+                    ExpenseModel deletedExpenseModel;
+                    deletedExpenseModel = expenseAdapter.getItem(position);
+//                    Toast.makeText(MainAcitvity.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
+                    deleteExpense(deletedExpenseModel);
+                    expenseAdapter.removeItem(position);
+                    expenseAdapter.notifyItemRemoved(position);
+                    break;
+            }
+        }
+    };
+
+
+    private void deleteExpense(ExpenseModel expenseModel){
+        FirebaseFirestore
+                .getInstance()
+                .collection("expenses")
+                .document(expenseModel.getExpenseId())
+                .delete();
+    }
+
 
 }
 

@@ -49,14 +49,12 @@ public class AddExpense extends AppCompatActivity  {
             binding.expenseRadio.setChecked(true);
         }
 
-
         binding.incomeRadio.setOnClickListener(view -> type = "Income");
         binding.expenseRadio.setOnClickListener(view -> type = "Expense");
 
 
         Button cancel_btn = findViewById(R.id.cancel_button);
         Button ok_btn = findViewById(R.id.ok_button);
-
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, categories);
 
@@ -67,9 +65,7 @@ public class AddExpense extends AppCompatActivity  {
             category = (String) parent.getItemAtPosition(position);
             System.out.println("selected item is : "+category);
             Toast.makeText(this, "selected item is : "+category, Toast.LENGTH_SHORT).show();
-
         });
-
 
         cancel_btn.setOnClickListener(view -> {
             expenseModel = null;
@@ -96,6 +92,14 @@ public class AddExpense extends AppCompatActivity  {
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        // Perform your desired functionality here
+        expenseModel = null;
+
+        super.onBackPressed();
     }
 
     private void createExpense() {
@@ -150,7 +154,6 @@ public class AddExpense extends AppCompatActivity  {
         finish();
         expenseModel = null;
     }
-
 
 }
 
