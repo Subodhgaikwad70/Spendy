@@ -31,7 +31,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
     private ExpenseAdapter expenseAdapter;
     CoordinatorLayout mSnackbarLayout;
-
+    RecyclerView recyclerView;
     ActivityTransactionsBinding binding;
 
     @Override
@@ -42,7 +42,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 //        setContentView(R.layout.activity_transactions);
 
         expenseAdapter = new ExpenseAdapter(this,this);
-        RecyclerView recyclerView = findViewById(R.id.recyclerView2);
+        recyclerView = findViewById(R.id.recyclerView2);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
@@ -129,21 +129,23 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                     ExpenseModel deletedExpenseModel;
                     deletedExpenseModel = expenseAdapter.getItem(position);
 //                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
-                    deleteExpense(deletedExpenseModel);
                     expenseAdapter.removeItem(position);
+                    deleteExpense(deletedExpenseModel);
                     expenseAdapter.notifyItemRemoved(position);
 
                     // Show the Snackbar with an undo action
-                    Snackbar snackbar = Snackbar.make(binding.recyclerView2, ""+deletedExpenseModel.getTitle().toString()+" is deleted !", Snackbar.LENGTH_LONG);
-                    snackbar.setAction("Undo", new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            // Handle the undo action here
+                    Snackbar snackbar = Snackbar.make(recyclerView, ""+deletedExpenseModel.getTitle()+" is deleted !", Snackbar.LENGTH_LONG);
+                    snackbar.setAction("Undo", v -> {
+                        // Handle the undo action here
 
-                            // For example, to restore the deleted item:
-                            expenseAdapter.insertItem(deletedExpenseModel,position);
-                            expenseAdapter.notifyItemInserted(position);
-                        }
+                        // For example, to restore the deleted item:
+                        expenseAdapter.insertItem(deletedExpenseModel,position);
+                        expenseAdapter.notifyItemInserted(position);
+                        FirebaseFirestore
+                                .getInstance()
+                                .collection("expenses")
+                                .document(deletedExpenseModel.getExpenseId())
+                                .set(deletedExpenseModel);
                     });
                     snackbar.show();
                     break;
