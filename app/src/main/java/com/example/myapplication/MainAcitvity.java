@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,6 +17,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -173,6 +177,26 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 //        transaction_intent.putExtra("adapter", (Serializable) expenseModelsList);
     }
 
+    private void setUpGraph(){
+        List<PieEntry> pieEntryList = new ArrayList<>();
+        List<Integer> colorsList = new ArrayList<>();
+        if (income!=0){
+            pieEntryList.add(new PieEntry(income,"Income"));
+            colorsList.add(ContextCompat.getColor(this, R.color.green_pie));
+        }
+        if (expense!=0){
+            pieEntryList.add(new PieEntry(expense,"Expense"));
+            colorsList.add(ContextCompat.getColor(this, R.color.red_pie));
+        }
+
+        PieDataSet pieDataSet = new PieDataSet(pieEntryList,String.valueOf(income-expense));
+        pieDataSet.setColors(colorsList);
+        PieData pieData = new PieData(pieDataSet);
+        binding.piechart.setData(pieData);
+
+
+    }
+
     @Override
     public void onClick(ExpenseModel expenseModel) {
         Intent expense_view_intent = new Intent(MainAcitvity.this,ExpenseView.class);
@@ -203,6 +227,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 //                    Toast.makeText(Transactions.this, "ExpenseId : "+deletedExpenseModel.getExpenseId(), Toast.LENGTH_SHORT).show();
                     expenseAdapter.removeItem(position);
                     deleteExpense(deletedExpenseModel);
+                    changeTotal(deletedExpenseModel);
                     expenseAdapter.notifyItemRemoved(position);
 
                     // Show the Snackbar with an undo action
@@ -269,6 +294,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         numberFormat.setCurrency(Currency.getInstance("INR"));
         String rupees = numberFormat.format(updatedspend);
         binding.totalSpend.setText(rupees);
+
     }
 
 }

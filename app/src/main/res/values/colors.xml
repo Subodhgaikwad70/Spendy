@@ -9,6 +9,7 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name='green_pie'>#00B112</color>
+    <color name='red_pie'>#B10000</color>
     <color name="green_text">#1AB900</color>
     <color name="red_text">#B10000</color>
     <color name="dark_blue_button">#022A72</color>

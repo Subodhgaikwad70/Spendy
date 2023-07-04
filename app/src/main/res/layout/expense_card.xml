@@ -10,7 +10,7 @@
     <androidx.cardview.widget.CardView
         android:id="@+id/transaction1"
         android:layout_width="360dp"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="10dp"
@@ -24,7 +24,9 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:layout_gravity="center"
             android:foregroundGravity="center"
             android:textAlignment="center">
@@ -40,15 +42,31 @@
                 app:srcCompat="@drawable/icon_3"
                 tools:srcCompat="@drawable/icon_3" />
 
+
+            <TextView
+                android:id="@+id/payment_title"
+                android:layout_width="140dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="8dp"
+                android:text="Payment"
+                android:maxLength="20"
+                android:textColor="#000000"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/note_view"
+                app:layout_constraintStart_toEndOf="@id/category_image"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <TextView
                 android:id="@+id/payment_amount"
-                android:layout_width="wrap_content"
+                android:layout_width="100dp"
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="16dp"
                 android:gravity="center"
                 android:text="+Rs2,000"
                 android:textColor="@color/green_text"
-                android:textSize="24sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -56,22 +74,8 @@
                 app:layout_constraintVertical_bias="0.25" />
 
             <TextView
-                android:id="@+id/payment_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:text="Payment"
-                android:textColor="#000000"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                app:layout_constraintBottom_toTopOf="@+id/note_view"
-                app:layout_constraintStart_toEndOf="@id/category_image"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
                 android:id="@+id/note_view"
-                android:layout_width="wrap_content"
+                android:layout_width="130dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginBottom="8dp"
