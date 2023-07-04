@@ -4,11 +4,16 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.myapplication.databinding.ActivityProgressBinding;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Progress extends AppCompatActivity {
 
@@ -24,6 +29,16 @@ public class Progress extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityProgressBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+
+        GridView gridView = findViewById(R.id.grid_view);
+        List<String> itemList = new ArrayList<>();
+        itemList.add("Expenses");
+        itemList.add("Income");
+        // Add more items as needed
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,R.layout.grid_item, R.id.category_name, itemList);
+        gridView.setAdapter(adapter);
 
 
         progressBar = findViewById(R.id.progress_bar);

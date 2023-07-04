@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.content.Intent;
 import android.graphics.Color;
@@ -48,6 +49,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
     RecyclerView recyclerView;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,10 +103,10 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
             return true;
         });
 
-        binding.piechart.setOnTouchListener((view, motionEvent) -> {
+
+        binding.editIcon.setOnClickListener(view -> {
             intent = new Intent(MainAcitvity.this, Progress.class);
             startActivity(intent);
-            return true;
         });
 
 
