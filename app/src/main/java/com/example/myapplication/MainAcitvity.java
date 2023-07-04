@@ -14,8 +14,11 @@ import android.os.Bundle;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.bumptech.glide.Glide;
 import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
@@ -49,6 +52,13 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         super.onCreate(savedInstanceState);
         binding = ActivityMainAcitvityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
+        ImageView imageView = binding.avatarView;
+        Glide.with(this)
+                .load(R.drawable.icon_3)
+                .circleCrop()
+                .into(imageView);
+
 
         expenseAdapter = new ExpenseAdapter(this,this);
         recyclerView = binding.recyclerView1;
@@ -168,13 +178,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                         }
                         expenseAdapter.add(expenseModel);
                     }
+                    setUpGraph();
                 });
-//        expenseAdapter.notifyDataSetChanged();
-
-//        Intent transaction_intent = new Intent(this,Transactions.class);
-//        List<ExpenseModel> expenseModelsList = new ArrayList<>();
-//        expenseModelsList = expenseAdapter.getExpenseModelsList();
-//        transaction_intent.putExtra("adapter", (Serializable) expenseModelsList);
     }
 
     private void setUpGraph(){
@@ -193,6 +198,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         pieDataSet.setColors(colorsList);
         PieData pieData = new PieData(pieDataSet);
         binding.piechart.setData(pieData);
+        binding.piechart.invalidate();
 
 
     }
