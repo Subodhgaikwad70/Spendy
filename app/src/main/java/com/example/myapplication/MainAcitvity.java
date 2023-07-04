@@ -15,6 +15,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -94,14 +95,18 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
             }
         });
 
-        binding.piechartView.setOnTouchListener(new View.OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-                // Pass the touch event to the GestureDetector
-                gestureDetector.onTouchEvent(event);
-                return true;
-            }
+        binding.headerConstraint.setOnTouchListener((v, event) -> {
+            // Pass the touch event to the GestureDetector
+            gestureDetector.onTouchEvent(event);
+            return true;
         });
+
+        binding.piechart.setOnTouchListener((view, motionEvent) -> {
+            intent = new Intent(MainAcitvity.this, Progress.class);
+            startActivity(intent);
+            return true;
+        });
+
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
@@ -136,27 +141,16 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         expense = 0;
         FirebaseFirestore.getInstance()
                 .collection(FirebaseAuth.getInstance().getUid())
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())
+                .orderBy("time", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     expenseAdapter.clear();
                     List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
-                    List<ExpenseModel> expenseModels = new ArrayList<>();
-
-                    for (DocumentSnapshot ds : dsList) {
-                        ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
-                        expenseModels.add(expenseModel);
-                    }
-
-                    // Sort the expenseModels list based on the timestamp
-                    Collections.sort(expenseModels, (expense1, expense2) -> {
-                        long time1 = expense1.getTime();
-                        long time2 = expense2.getTime();
-                        return Long.compare(time2, time1); // Sorting in descending order
-                    });
 
                     // Add the sorted expenseModels to the adapter
-                    for (ExpenseModel expenseModel : expenseModels) {
+                    for (DocumentSnapshot ds:dsList) {
+                        ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
+
                         if (expenseModel.getType().equals("Income")){
                             income+=expenseModel.getAmount();
                         }else{

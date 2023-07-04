@@ -46,6 +46,8 @@ public class Progress extends AppCompatActivity {
                 updateProgressBar();
             }
         });
+
+
     }
 
     private void updateProgressBar() {

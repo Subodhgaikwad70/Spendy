@@ -41,7 +41,7 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView1"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
         android:layout_marginTop="8dp"
@@ -52,12 +52,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardView0">
 
-        <TextView
-            android:id="@+id/timeline_view"
-            android:layout_width="match_parent"
+        <Spinner
+            android:id="@+id/all_view"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_marginBottom="8dp"
             android:text="All"
             android:textAlignment="center"
             android:textSize="20sp"
@@ -71,10 +69,11 @@
 
     <androidx.cardview.widget.CardView
         android:id="@+id/filter_cardview"
-        android:layout_width="100dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
+        android:layout_marginStart="52dp"
         android:foregroundGravity="center"
         android:textAlignment="center"
         app:cardCornerRadius="20dp"
@@ -82,14 +81,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardView0">
 
-        <TextView
+        <Spinner
             android:id="@+id/filter_view"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="8dp"
-            android:text="Sort"
+            android:layout_gravity="center"
+            android:text="Filter by"
             android:textAlignment="center"
             android:textSize="20sp"
             android:textStyle="bold"

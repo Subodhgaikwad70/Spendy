@@ -12,14 +12,21 @@ import android.os.Bundle;
 import android.renderscript.ScriptGroup;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.myapplication.databinding.ActivityAddExpenseBinding;
 import com.example.myapplication.databinding.ActivityTransactionsBinding;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,6 +37,12 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     Intent intent;
 
     private ExpenseAdapter expenseAdapter;
+
+    private String filterby;
+
+    public double expense = 0;
+    public double income =0;
+    ArrayList<String> categories = new ArrayList<>();
     RecyclerView recyclerView;
     ActivityTransactionsBinding binding;
 
@@ -47,6 +60,63 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        AddExpense addExpense = new AddExpense();
+        String[] temp = addExpense.categories;
+
+
+        categories.add("Filter");
+        for (String s : temp){
+            categories.add(s);
+        }
+
+        String[] all_view = new String[] {"All","Income","Expense"};
+
+        Spinner filterView = binding.filterView;
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, categories);
+        filterView.setAdapter(adapter);
+
+        Spinner allView = binding.allView;
+        ArrayAdapter<String> all_view_adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, all_view);
+        allView.setAdapter(all_view_adapter);
+
+        allView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                filterby = (String) adapterView.getItemAtPosition(i);
+                if (filterby.equals("All")){
+                    getData();
+                    recyclerView.setAdapter(expenseAdapter);
+                }else {
+                    getFilteredData("type",filterby);
+                    recyclerView.setAdapter(expenseAdapter);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        filterView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                filterby = (String) adapterView.getItemAtPosition(i);
+                if (filterby.equals("Filter")){
+                    getData();
+                    recyclerView.setAdapter(expenseAdapter);
+                }else {
+                    getFilteredData("category",filterby);
+                    recyclerView.setAdapter(expenseAdapter);
+                }
+            }
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
 
     }
 
@@ -83,32 +153,66 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     private void getData() {
         FirebaseFirestore.getInstance()
                 .collection(FirebaseAuth.getInstance().getUid())
-                .whereEqualTo("uid", FirebaseAuth.getInstance().getUid())
+                .orderBy("time", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     expenseAdapter.clear();
                     List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
-                    List<ExpenseModel> expenseModels = new ArrayList<>();
 
-                    for (DocumentSnapshot ds : dsList) {
+                    for (DocumentSnapshot ds:dsList) {
                         ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
-                        expenseModels.add(expenseModel);
-                    }
-
-                    // Sort the expenseModels list based on the timestamp
-                    Collections.sort(expenseModels, (expense1, expense2) -> {
-                        long time1 = expense1.getTime();
-                        long time2 = expense2.getTime();
-                        return Long.compare(time2, time1); // Sorting in descending order
-                    });
-
-                    // Add the sorted expenseModels to the adapter
-                    for (ExpenseModel expenseModel : expenseModels) {
                         expenseAdapter.add(expenseModel);
                     }
                 });
     }
 
+    public void getFilteredData(String filterType, String filterby) {
+
+        FirebaseFirestore.getInstance()
+                .collection(FirebaseAuth.getInstance().getUid())
+                .whereEqualTo(filterType, filterby)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    expenseAdapter.clear();
+                    List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
+
+                    // Sort the documents based on the "time" field in descending order
+                    Collections.sort(dsList, (doc1, doc2) -> {
+                        long time1 = doc1.getLong("time");
+                        long time2 = doc2.getLong("time");
+                        return Long.compare(time2, time1); // Descending order
+                    });
+
+                    for (DocumentSnapshot ds : dsList) {
+                        ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
+
+                        if (expenseModel.getType().equals("Income")){
+                            income+=expenseModel.getAmount();
+                        }else{
+                            expense+=expenseModel.getAmount();
+                        }
+
+                        expenseAdapter.add(expenseModel);
+                    }
+                    expenseAdapter.notifyDataSetChanged();
+                    Toast.makeText(Transactions.this, "Success!", Toast.LENGTH_SHORT).show();
+                })
+                .addOnFailureListener(e -> {
+//                                Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
+                    expenseAdapter.clear();
+                    expenseAdapter.notifyDataSetChanged();
+                    Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
+                });
+
+    }
+
+    public double getExpense() {
+        return expense;
+    }
+
+    public double getIncome() {
+        return income;
+    }
 
     ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
         @Override

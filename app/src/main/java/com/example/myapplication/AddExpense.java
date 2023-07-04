@@ -44,7 +44,6 @@ public class AddExpense extends AppCompatActivity  {
         expenseModel = (ExpenseModel) getIntent().getSerializableExtra("model");
 
 
-
         if( expenseModel!=null ){
             binding.enterTitle.setText(expenseModel.getTitle());
             binding.enterAmount.setText(String.valueOf(expenseModel.getAmount()));
@@ -67,6 +66,7 @@ public class AddExpense extends AppCompatActivity  {
 
         Button cancel_btn = findViewById(R.id.cancel_button);
         Button ok_btn = findViewById(R.id.ok_button);
+
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, categories);
 

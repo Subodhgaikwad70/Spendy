@@ -57,6 +57,7 @@
         app:layout_constraintTop_toBottomOf="@id/linear1">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/header_constraint"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"

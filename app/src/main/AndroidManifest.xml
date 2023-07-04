@@ -13,7 +13,7 @@
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
         <activity
-            android:name=".MainAcitvity"
+            android:name=".Progress"
             android:exported="false" />
         <activity
             android:name=".Login"
@@ -29,7 +29,7 @@
             android:name=".Transactions"
             android:exported="false" />
         <activity
-            android:name=".Progress"
+            android:name=".MainAcitvity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
