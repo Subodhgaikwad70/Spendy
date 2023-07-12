@@ -114,6 +114,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
 
+
+
     }
 
 
@@ -186,7 +188,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                     }
 
                     setUpGraph();
-
+                    binding.progressBar0.setVisibility(View.GONE);
                 });
     }
 

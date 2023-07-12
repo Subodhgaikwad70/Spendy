@@ -86,9 +86,11 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 filterby = (String) adapterView.getItemAtPosition(i);
                 if (filterby.equals("All")){
+                    binding.progressBar0.setVisibility(View.VISIBLE);
                     getData();
                     recyclerView.setAdapter(expenseAdapter);
                 }else {
+                    binding.progressBar0.setVisibility(View.VISIBLE);
                     getFilteredData("type",filterby);
                     recyclerView.setAdapter(expenseAdapter);
                 }
@@ -165,6 +167,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         expenseAdapter.add(expenseModel);
                     }
                 });
+        binding.progressBar0.setVisibility(View.GONE);
 
     }
 
@@ -213,6 +216,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
             binding.noData.setVisibility(View.GONE);
             binding.recyclerView2.setVisibility(View.VISIBLE);
         }
+        binding.progressBar0.setVisibility(View.GONE);
 
     }
 

@@ -5,6 +5,7 @@ import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -23,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHolder> {
 
-
+    ProgressBar progressBar;
     private Context context;
     private OnItemsClick onItemsClick;
     private List<ExpenseModel> expenseModelList;
@@ -131,12 +132,22 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         private TextView note, title, category, amount, date;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
+            progressBar = itemView.findViewById(R.id.progress_bar0);
             note = itemView.findViewById(R.id.note_view);
             amount = itemView.findViewById(R.id.payment_amount);
             title = itemView.findViewById(R.id.payment_title);
             date = itemView.findViewById(R.id.date_view);
         }
     }
+
+
+    public void turnProgressBarOff(){
+        if (progressBar != null){
+            progressBar.setVisibility(View.GONE);
+        }
+    }
+
+
 
 }
 
