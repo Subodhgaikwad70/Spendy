@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     ActivityMainAcitvityBinding binding;
@@ -48,6 +49,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     private long income = 0, expense=0;
 
     RecyclerView recyclerView;
+
+    private float startY;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -84,36 +87,35 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                // Calculate the swipe direction based on the Y coordinates of the MotionEvent objects
+                int MIN_SWIPE_DISTANCE = 150;
+                float deltaX = e2.getX() - e1.getX();
                 float deltaY = e2.getY() - e1.getY();
-                if (deltaY < 0) {
-                    // Swiped from bottom to top (swipe up)
-                    // Start the new activity here
+
+                // Check if the swipe is in the up direction and exceeds the minimum distance
+                if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
                     Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
                     startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
                     return true;
                 }
+
                 return false;
             }
         });
 
-        binding.headerConstraint.setOnTouchListener((v, event) -> {
+        binding.getRoot().setOnTouchListener((v, event) -> {
             // Pass the touch event to the GestureDetector
             gestureDetector.onTouchEvent(event);
             return true;
         });
 
 
-        binding.editIcon.setOnClickListener(view -> {
-            intent = new Intent(MainAcitvity.this, Progress.class);
-            startActivity(intent);
-        });
-
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
+
     }
+
 
     @Override
     protected void onStart() {
@@ -142,7 +144,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         income =0;
         expense = 0;
         FirebaseFirestore.getInstance()
-                .collection(FirebaseAuth.getInstance().getUid())
+                .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .orderBy("time", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -174,7 +176,17 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                         }
                         expenseAdapter.add(expenseModel);
                     }
+
+                    if (expenseAdapter.getItemCount() == 0) {
+                        binding.emptyRecycler.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                    } else {
+                        binding.emptyRecycler.setVisibility(View.GONE);
+                        recyclerView.setVisibility(View.VISIBLE);
+                    }
+
                     setUpGraph();
+
                 });
     }
 
@@ -196,7 +208,13 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         binding.piechart.setData(pieData);
         binding.piechart.invalidate();
 
-
+        if (income==0 && expense ==0) {
+            binding.emptyView.setVisibility(View.VISIBLE);
+            binding.piechart.setVisibility(View.GONE);
+        } else {
+            binding.emptyView.setVisibility(View.GONE);
+            binding.piechart.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -264,27 +282,13 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 .document(expenseModel.getExpenseId())
                 .delete();
 
-//        getData();
-//        TextView totalspendview = findViewById(R.id.totalSpend);
-//        String totalspend = totalspendview.getText().toString();
-//        totalspend = totalspend.replace("₹", "").replace(",", "");
-//        double updatedspend=0;
-//        if(expenseModel.getType().equals("Income")){
-//            updatedspend = Double.parseDouble(totalspend) - expenseModel.getAmount();
-//        }else{
-//            updatedspend = Double.parseDouble(totalspend) + expenseModel.getAmount();
-//        }
-//
-//        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
-//        numberFormat.setCurrency(Currency.getInstance("INR"));
-//        String rupees = numberFormat.format(updatedspend);
-//        binding.totalSpend.setText(rupees);
     }
+
     void changeTotal(ExpenseModel expenseModel){
 
         TextView totalspendview = findViewById(R.id.totalSpend);
         String totalspend = totalspendview.getText().toString();
-        totalspend = totalspend.replace("₹", "").replace(",", "");
+        totalspend = totalspend.replace("₹", "").replace(",", "").replaceAll("\\s", "").trim();
         double updatedspend=0;
         if(expenseModel.getType().equals("Income")){
             updatedspend = Double.parseDouble(totalspend) - expenseModel.getAmount();
@@ -297,6 +301,24 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         String rupees = numberFormat.format(updatedspend);
         binding.totalSpend.setText(rupees);
 
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent e) {
+
+
+        switch (e.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                startY = e.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float currentY = e.getY();
+                if (currentY < startY) {
+                    return false; // Disable scroll when swiping up
+                }
+                break;
+        }
+        return super.onTouchEvent(e);
     }
 
 }

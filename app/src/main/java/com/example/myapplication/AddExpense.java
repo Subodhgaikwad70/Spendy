@@ -23,6 +23,7 @@ import java.text.NumberFormat;
 import java.util.Calendar;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.UUID;
 
 public class AddExpense extends AppCompatActivity  {
@@ -106,33 +107,6 @@ public class AddExpense extends AppCompatActivity  {
                 finish();
             }
         });
-
-//        binding.enterAmount.addTextChangedListener(new TextWatcher() {
-//            private DecimalFormat decimalFormat = new DecimalFormat("#,##,##,###");
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//                // This method is called before the text is changed
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                // This method is called when the text is being changed
-//                String newText = s.toString(); // Get the updated text
-//                // Perform any required text manipulation or processing
-////                String modifiedText = newText.toUpperCase(); // Example: convert text to uppercase
-//
-//                String modifiedText = decimalFormat.format(Integer.parseInt(newText));
-//                binding.enterAmount.setText(modifiedText); // Update the text in the EditText
-//                binding.enterAmount.setSelection(modifiedText.length()); // Set the cursor position to the end
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                // This method is called after the text has been changed
-//            }
-//        });
-
-
     }
 
     @Override
@@ -162,7 +136,7 @@ public class AddExpense extends AppCompatActivity  {
 
         FirebaseFirestore
                 .getInstance()
-                .collection(FirebaseAuth.getInstance().getUid())
+                .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .document(expenseId)
                 .set(expenseModel);
         finish();
@@ -192,7 +166,7 @@ public class AddExpense extends AppCompatActivity  {
 
         FirebaseFirestore
                 .getInstance()
-                .collection(FirebaseAuth.getInstance().getUid())
+                .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .document(expenseModel.getExpenseId())
                 .set(model);
 

@@ -97,6 +97,24 @@
 
     </androidx.cardview.widget.CardView>
 
+    <TextView
+        android:id="@+id/no_data"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:text="No items to display"
+        android:visibility="gone"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:layout_height="400dp"
+        android:layout_marginTop="8dp"
+        android:foregroundGravity="center_horizontal"
+        android:orientation="vertical"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/filter_cardview"/>
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView2"
         android:layout_width="match_parent"

@@ -31,6 +31,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Transactions extends AppCompatActivity implements OnItemsClick {
 
@@ -49,7 +50,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ActivityTransactionsBinding binding = ActivityTransactionsBinding.inflate(getLayoutInflater());
+        binding = ActivityTransactionsBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
 
@@ -152,7 +153,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
     private void getData() {
         FirebaseFirestore.getInstance()
-                .collection(FirebaseAuth.getInstance().getUid())
+                .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .orderBy("time", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -164,12 +165,13 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         expenseAdapter.add(expenseModel);
                     }
                 });
+
     }
 
     public void getFilteredData(String filterType, String filterby) {
 
         FirebaseFirestore.getInstance()
-                .collection(FirebaseAuth.getInstance().getUid())
+                .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .whereEqualTo(filterType, filterby)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -203,6 +205,14 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                     expenseAdapter.notifyDataSetChanged();
                     Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
                 });
+
+        if (expenseAdapter.getItemCount() == 0) {
+            binding.noData.setVisibility(View.VISIBLE);
+            binding.recyclerView2.setVisibility(View.GONE);
+        } else {
+            binding.noData.setVisibility(View.GONE);
+            binding.recyclerView2.setVisibility(View.VISIBLE);
+        }
 
     }
 

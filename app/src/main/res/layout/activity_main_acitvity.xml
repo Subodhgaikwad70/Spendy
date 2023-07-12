@@ -97,6 +97,7 @@
 
     </androidx.cardview.widget.CardView>
 
+
     <androidx.cardview.widget.CardView
         android:id="@+id/piechart_view"
         android:padding="20dp"
@@ -120,6 +121,19 @@
             android:padding="10dp"
             app:srcCompat="@drawable/round_edit_24" />
 
+        <TextView
+            android:id="@+id/empty_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="No Chart Data Available"
+            android:textAppearance="?android:textAppearanceMedium"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <com.github.mikephil.charting.charts.PieChart
             android:id="@+id/piechart"
             android:layout_width="314dp"
@@ -131,25 +145,24 @@
             android:layout_marginRight="20dp"
             android:layout_marginBottom="20dp" />
 
-        <!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            android:layout_gravity="center"-->
-        <!--            android:foregroundGravity="center"-->
-        <!--            android:textAlignment="center" />-->
-        <!--        <com.ramijemli.percentagechartview.PercentageChartView-->
-        <!--            android:id="@+id/view_id"-->
-        <!--            android:layout_width="match_parent"-->
-        <!--            android:layout_height="match_parent"-->
-        <!--            app:pcv_mode="pie"-->
-        <!--            app:pcv_orientation="counter_clockwise"-->
-        <!--            app:pcv_animDuration="800"-->
-        <!--            app:pcv_animInterpolator="anticipate_overshoot"-->
-        <!--            app:pcv_progress="10"-->
-        <!--            app:pcv_startAngle="90"/>-->
-
 
     </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/empty_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:layout_marginTop="8dp"
+        android:foregroundGravity="center_horizontal"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:text="No items to display"
+        android:textAlignment="center"
+        android:textAppearance="?android:textAppearanceMedium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/piechart_view" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView1"
@@ -163,6 +176,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/piechart_view">
+
 
     </androidx.recyclerview.widget.RecyclerView>
 
