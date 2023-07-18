@@ -141,14 +141,6 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
     }
 
 
-    public void turnProgressBarOff(){
-        if (progressBar != null){
-            progressBar.setVisibility(View.GONE);
-        }
-    }
-
-
-
 }
 
 

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.os.Bundle;
 import android.renderscript.ScriptGroup;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -34,8 +35,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class Transactions extends AppCompatActivity implements OnItemsClick {
-
-    Intent intent;
 
     private ExpenseAdapter expenseAdapter;
 
@@ -81,36 +80,17 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
         ArrayAdapter<String> all_view_adapter = new ArrayAdapter<>(this, R.layout.dropdown_menu_popup_item, all_view);
         allView.setAdapter(all_view_adapter);
 
-        allView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                filterby = (String) adapterView.getItemAtPosition(i);
-                if (filterby.equals("All")){
-                    binding.progressBar0.setVisibility(View.VISIBLE);
-                    getData();
-                    recyclerView.setAdapter(expenseAdapter);
-                }else {
-                    binding.progressBar0.setVisibility(View.VISIBLE);
-                    getFilteredData("type",filterby);
-                    recyclerView.setAdapter(expenseAdapter);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-
-            }
-        });
-
         filterView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 filterby = (String) adapterView.getItemAtPosition(i);
                 if (filterby.equals("Filter")){
                     getData();
+                    Log.i("My App","Filter getData !");
                     recyclerView.setAdapter(expenseAdapter);
                 }else {
                     getFilteredData("category",filterby);
+                    Log.i("My App","Filter : "+filterby);
                     recyclerView.setAdapter(expenseAdapter);
                 }
             }
@@ -119,6 +99,40 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
 
             }
         });
+
+
+        allView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                filterby = (String) adapterView.getItemAtPosition(i);
+                if (filterby.equals("All")){
+                    binding.progressBar0.setVisibility(View.VISIBLE);
+                    Log.i("My App","All getData !");
+                    getData();
+                    recyclerView.setAdapter(expenseAdapter);
+                }else {
+                    binding.progressBar0.setVisibility(View.VISIBLE);
+                    getFilteredData("type",filterby);
+                    Log.i("My App","All FilteredData !"+filterby);
+                    recyclerView.setAdapter(expenseAdapter);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        String filter_by = getIntent().getStringExtra("category");
+        if(filter_by!=null) {
+//            getFilteredData("category", filter_by);
+            int position = adapter.getPosition(filter_by);
+            filterView.setSelection(position);
+            recyclerView.setAdapter(expenseAdapter);
+            Log.i("My App","Filter set !");
+
+        }
 
 
     }
@@ -136,21 +150,12 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
     protected void onStart() {
         super.onStart();
 
-        if(FirebaseAuth.getInstance().getCurrentUser()==null)
-        {
-            FirebaseAuth.getInstance()
-                    .signInAnonymously()
-                    .addOnSuccessListener(authResult -> {
-
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(Transactions.this, e.getMessage(), Toast.LENGTH_SHORT).show());
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        getData();
+//        getData();
     }
 
     private void getData() {
@@ -166,13 +171,14 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
                         expenseAdapter.add(expenseModel);
                     }
+                    Toast.makeText(Transactions.this, "getdata : success", Toast.LENGTH_SHORT).show();
+                    Log.i("My App","getData !");
                 });
         binding.progressBar0.setVisibility(View.GONE);
 
     }
 
     public void getFilteredData(String filterType, String filterby) {
-
         FirebaseFirestore.getInstance()
                 .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .whereEqualTo(filterType, filterby)
@@ -200,33 +206,26 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         expenseAdapter.add(expenseModel);
                     }
                     expenseAdapter.notifyDataSetChanged();
-                    Toast.makeText(Transactions.this, "Success!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(Transactions.this, "Success! "+filterby+" "+expenseAdapter.getItemCount(), Toast.LENGTH_SHORT).show();
+                    Log.i("My App","Success! "+filterby+" "+expenseAdapter.getItemCount());
                 })
                 .addOnFailureListener(e -> {
-//                                Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
                     expenseAdapter.clear();
                     expenseAdapter.notifyDataSetChanged();
                     Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
                 });
 
-        if (expenseAdapter.getItemCount() == 0) {
-            binding.noData.setVisibility(View.VISIBLE);
-            binding.recyclerView2.setVisibility(View.GONE);
-        } else {
-            binding.noData.setVisibility(View.GONE);
-            binding.recyclerView2.setVisibility(View.VISIBLE);
-        }
-        binding.progressBar0.setVisibility(View.GONE);
+//        if (expenseAdapter.getItemCount() == 0) {
+//            binding.noData.setVisibility(View.VISIBLE);
+//            binding.recyclerView2.setVisibility(View.GONE);
+//        } else {
+//            binding.noData.setVisibility(View.GONE);
+//            binding.recyclerView2.setVisibility(View.VISIBLE);
+//        }
+//        binding.progressBar0.setVisibility(View.GONE);
 
     }
 
-    public double getExpense() {
-        return expense;
-    }
-
-    public double getIncome() {
-        return income;
-    }
 
     ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
         @Override
@@ -272,6 +271,11 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
             }
         }
     };
+
+    public void onDestroy() {
+        super.onDestroy();
+        finish();
+    }
 
 }
 
