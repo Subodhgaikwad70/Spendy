@@ -37,20 +37,23 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
     ActivityMainAcitvityBinding binding;
-    private ExpenseAdapter expenseAdapter;
-    Intent intent;
-    private GestureDetector gestureDetector;
-    private long income = 0, expense=0;
-
     RecyclerView recyclerView;
 
+    private ExpenseAdapter expenseAdapter;
+    private GestureDetector gestureDetector;
+    private long income = 0, expense=0;
     private float startY;
+
+
+    static List<DocumentSnapshot> dsList = new ArrayList<>();
+    static HashMap<String, Integer> categories = new HashMap<>();
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -59,12 +62,12 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         binding = ActivityMainAcitvityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
         ImageView imageView = binding.avatarView;
         Glide.with(this)
                 .load(R.drawable.icon_3)
                 .circleCrop()
                 .into(imageView);
-
 
         expenseAdapter = new ExpenseAdapter(this,this);
         recyclerView = binding.recyclerView1;
@@ -74,12 +77,12 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
-        intent=new Intent(this, AddExpense.class);
+        Intent add_exp_intent=new Intent(this, AddExpense.class);
 
         circular_add_button.setOnClickListener(view -> {
             ExpenseModel expenseModel=null;
-            intent.putExtra("model",expenseModel);
-            startActivity(intent);
+            add_exp_intent.putExtra("model",expenseModel);
+            startActivity(add_exp_intent);
 
         });
 
@@ -93,6 +96,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
                 // Check if the swipe is in the up direction and exceeds the minimum distance
                 if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
+
                     Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
                     startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
                     return true;
@@ -108,13 +112,18 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
             return true;
         });
 
+        binding.editIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent progress_intent = new Intent(MainAcitvity.this, Progress.class);
+                startActivity(progress_intent);
+            }
+        });
+
 
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
-
-
-
 
     }
 
@@ -151,7 +160,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     expenseAdapter.clear();
-                    List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
+                    categories.clear();
+                    dsList = queryDocumentSnapshots.getDocuments();
 
                     // Add the sorted expenseModels to the adapter
                     for (DocumentSnapshot ds:dsList) {
@@ -162,6 +172,18 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                         }else{
                             expense+=expenseModel.getAmount();
                         }
+
+                        String category = expenseModel.getCategory();
+                        if (categories.containsKey(category)) {
+                            Integer noOfCat = categories.get(category);
+                            if (noOfCat != null) {
+                                int updatedCount = noOfCat + 1;
+                                categories.put(category, updatedCount);
+                            }
+                        } else {
+                            categories.put(category, 1);
+                        }
+
                         long total = income-expense;
 
                         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
@@ -225,6 +247,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         expense_view_intent.putExtra("model",expenseModel);
         startActivity(expense_view_intent);
     }
+
 
 
     ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -307,7 +330,6 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-
 
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
