@@ -90,7 +90,7 @@ public class AddExpense extends AppCompatActivity  {
             if(binding.enterTitle.getText().toString().trim().length() == 0){
                 binding.enterTitle.setError("Required Field");
 
-            }else if(binding.enterAmount.getText().toString().trim().length() == 0){
+            }else if(binding.enterAmount.getText().toString().trim().length() == 0 || binding.enterAmount.getText().toString()=="0"){
                 binding.enterAmount.setError("Required Field");
 
             }else if(binding.filledExposedDropdown.getText().toString().trim().length() == 0){
@@ -123,6 +123,11 @@ public class AddExpense extends AppCompatActivity  {
         String amount = binding.enterAmount.getText().toString();
         String type ;
         String note = binding.enterNote.getText().toString();
+//        title = String.capitalize(title);
+
+        if(note==null || note.length()==0){
+            note = title;
+        }
 //        category = null;
         boolean incomeChecked = binding.incomeRadio.isChecked();
 

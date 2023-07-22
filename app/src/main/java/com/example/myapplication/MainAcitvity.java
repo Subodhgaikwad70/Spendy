@@ -2,16 +2,24 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Telephony;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,6 +33,9 @@ import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
+import com.google.android.gms.auth.api.phone.SmsRetriever;
+import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,8 +52,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
+    private static final int SMS_PERMISSION_REQUEST_CODE = 100;
     ActivityMainAcitvityBinding binding;
     RecyclerView recyclerView;
 
@@ -69,19 +83,26 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 .circleCrop()
                 .into(imageView);
 
-        expenseAdapter = new ExpenseAdapter(this,this);
+        binding.avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent login_intent = new Intent(MainAcitvity.this,Login.class);
+                startActivity(login_intent);
+            }
+        });
+
+        expenseAdapter = new ExpenseAdapter(this, this);
         recyclerView = binding.recyclerView1;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
-
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
-        Intent add_exp_intent=new Intent(this, AddExpense.class);
+        Intent add_exp_intent = new Intent(this, AddExpense.class);
 
         circular_add_button.setOnClickListener(view -> {
-            ExpenseModel expenseModel=null;
-            add_exp_intent.putExtra("model",expenseModel);
+            ExpenseModel expenseModel = null;
+            add_exp_intent.putExtra("model", expenseModel);
             startActivity(add_exp_intent);
 
         });
@@ -90,17 +111,46 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                int MIN_SWIPE_DISTANCE = 150;
-                float deltaX = e2.getX() - e1.getX();
-                float deltaY = e2.getY() - e1.getY();
+//                int MIN_SWIPE_DISTANCE = 150;
+//                float deltaX = e2.getX() - e1.getX();
+//                float deltaY = e2.getY() - e1.getY();
 
                 // Check if the swipe is in the up direction and exceeds the minimum distance
-                if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
+//                if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
+//
+//                    Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+//                    startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
+//                    return true;
+//                }
 
-                    Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
-                    startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
-                    return true;
+                int SWIPE_THRESHOLD = 100;
+                int SWIPE_VELOCITY_THRESHOLD = 100;
+
+                float diffY = e2.getY() - e1.getY();
+                float diffX = e2.getX() - e1.getX();
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+//                            onSwipeRight();
+                        } else {
+//                            onSwipeLeft();
+                            Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+                            startActivity(new Intent(MainAcitvity.this, Progress.class), b);
+                        }
+//                        result = true;
+                    }
+                } else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffY > 0) {
+//                        onSwipeBottom();
+                    } else {
+//                        onSwipeTop();
+                        Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+                        startActivity(new Intent(MainAcitvity.this, Transactions.class), b);
+//                    result = true;
+
+                    }
                 }
+
 
                 return false;
             }
@@ -121,9 +171,12 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         });
 
 
-
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
+
+        // Start the service
+        Intent serviceIntent = new Intent(this, SmsService.class);
+        startService(serviceIntent);
 
     }
 
@@ -134,12 +187,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
         if(FirebaseAuth.getInstance().getCurrentUser()==null)
         {
-            FirebaseAuth.getInstance()
-                    .signInAnonymously()
-                    .addOnSuccessListener(authResult -> {
-
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(MainAcitvity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+            Intent intent_login = new Intent(MainAcitvity.this, Login.class);
+            startActivity(intent_login);
         }
     }
 
