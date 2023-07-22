@@ -2,24 +2,16 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
-import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.Telephony;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,9 +25,6 @@ import com.example.myapplication.databinding.ActivityMainAcitvityBinding;
 import com.github.mikephil.charting.data.PieData;
 import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
-import com.google.android.gms.auth.api.phone.SmsRetriever;
-import com.google.android.gms.auth.api.phone.SmsRetrieverClient;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,26 +37,20 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
-    private static final int SMS_PERMISSION_REQUEST_CODE = 100;
     ActivityMainAcitvityBinding binding;
-    RecyclerView recyclerView;
-
     private ExpenseAdapter expenseAdapter;
+    Intent intent;
     private GestureDetector gestureDetector;
     private long income = 0, expense=0;
+
+    RecyclerView recyclerView;
+
     private float startY;
-
-
-    static List<DocumentSnapshot> dsList = new ArrayList<>();
-    static HashMap<String, Integer> categories = new HashMap<>();
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -76,34 +59,27 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         binding = ActivityMainAcitvityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-
         ImageView imageView = binding.avatarView;
         Glide.with(this)
                 .load(R.drawable.icon_3)
                 .circleCrop()
                 .into(imageView);
 
-        binding.avatarView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent login_intent = new Intent(MainAcitvity.this,Login.class);
-                startActivity(login_intent);
-            }
-        });
 
-        expenseAdapter = new ExpenseAdapter(this, this);
+        expenseAdapter = new ExpenseAdapter(this,this);
         recyclerView = binding.recyclerView1;
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
+
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
-        Intent add_exp_intent = new Intent(this, AddExpense.class);
+        intent=new Intent(this, AddExpense.class);
 
         circular_add_button.setOnClickListener(view -> {
-            ExpenseModel expenseModel = null;
-            add_exp_intent.putExtra("model", expenseModel);
-            startActivity(add_exp_intent);
+            ExpenseModel expenseModel=null;
+            intent.putExtra("model",expenseModel);
+            startActivity(intent);
 
         });
 
@@ -111,46 +87,16 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-//                int MIN_SWIPE_DISTANCE = 150;
-//                float deltaX = e2.getX() - e1.getX();
-//                float deltaY = e2.getY() - e1.getY();
+                int MIN_SWIPE_DISTANCE = 150;
+                float deltaX = e2.getX() - e1.getX();
+                float deltaY = e2.getY() - e1.getY();
 
                 // Check if the swipe is in the up direction and exceeds the minimum distance
-//                if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
-//
-//                    Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
-//                    startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
-//                    return true;
-//                }
-
-                int SWIPE_THRESHOLD = 100;
-                int SWIPE_VELOCITY_THRESHOLD = 100;
-
-                float diffY = e2.getY() - e1.getY();
-                float diffX = e2.getX() - e1.getX();
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
-                        if (diffX > 0) {
-//                            onSwipeRight();
-                        } else {
-//                            onSwipeLeft();
-                            Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
-                            startActivity(new Intent(MainAcitvity.this, Progress.class), b);
-                        }
-//                        result = true;
-                    }
-                } else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
-                    if (diffY > 0) {
-//                        onSwipeBottom();
-                    } else {
-//                        onSwipeTop();
-                        Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
-                        startActivity(new Intent(MainAcitvity.this, Transactions.class), b);
-//                    result = true;
-
-                    }
+                if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
+                    Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+                    startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
+                    return true;
                 }
-
 
                 return false;
             }
@@ -162,21 +108,13 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
             return true;
         });
 
-        binding.editIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent progress_intent = new Intent(MainAcitvity.this, Progress.class);
-                startActivity(progress_intent);
-            }
-        });
 
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        // Start the service
-        Intent serviceIntent = new Intent(this, SmsService.class);
-        startService(serviceIntent);
+
+
 
     }
 
@@ -187,8 +125,12 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
         if(FirebaseAuth.getInstance().getCurrentUser()==null)
         {
-            Intent intent_login = new Intent(MainAcitvity.this, Login.class);
-            startActivity(intent_login);
+            FirebaseAuth.getInstance()
+                    .signInAnonymously()
+                    .addOnSuccessListener(authResult -> {
+
+                    })
+                    .addOnFailureListener(e -> Toast.makeText(MainAcitvity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
         }
     }
 
@@ -209,8 +151,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     expenseAdapter.clear();
-                    categories.clear();
-                    dsList = queryDocumentSnapshots.getDocuments();
+                    List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
 
                     // Add the sorted expenseModels to the adapter
                     for (DocumentSnapshot ds:dsList) {
@@ -221,18 +162,6 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                         }else{
                             expense+=expenseModel.getAmount();
                         }
-
-                        String category = expenseModel.getCategory();
-                        if (categories.containsKey(category)) {
-                            Integer noOfCat = categories.get(category);
-                            if (noOfCat != null) {
-                                int updatedCount = noOfCat + 1;
-                                categories.put(category, updatedCount);
-                            }
-                        } else {
-                            categories.put(category, 1);
-                        }
-
                         long total = income-expense;
 
                         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
@@ -296,7 +225,6 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         expense_view_intent.putExtra("model",expenseModel);
         startActivity(expense_view_intent);
     }
-
 
 
     ItemTouchHelper.SimpleCallback swipeToDeleteCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
@@ -379,6 +307,7 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+
 
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
