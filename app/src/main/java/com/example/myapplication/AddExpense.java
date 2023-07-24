@@ -77,7 +77,7 @@ public class AddExpense extends AppCompatActivity  {
         editTextFilledExposedDropdown.setOnItemClickListener((parent, view, position, id) -> {
             category = (String) parent.getItemAtPosition(position);
             System.out.println("selected item is : "+category);
-            Toast.makeText(this, "selected item is : "+category, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "selected item is : "+category, Toast.LENGTH_SHORT).show();
         });
 
         cancel_btn.setOnClickListener(view -> {

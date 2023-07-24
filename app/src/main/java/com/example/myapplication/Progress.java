@@ -1,13 +1,17 @@
 package com.example.myapplication;
 
+import static com.example.myapplication.MainAcitvity.categories;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.myapplication.databinding.ActivityProgressBinding;
 
@@ -33,13 +37,19 @@ public class Progress extends AppCompatActivity implements OnProgressClick{
 
         progressAdapter = new ProgressAdapter(this,this);
         progressRecycler = binding.progressRecycler;
-        progressRecycler.setLayoutManager(new GridLayoutManager(this, 2));
+        progressRecycler.setLayoutManager(new LinearLayoutManager(this));
+//        progressRecycler.setLayoutManager(new GridLayoutManager(this, 2));
         progressRecycler.setAdapter(progressAdapter);
 
-        for(String category : MainAcitvity.categories.keySet()){
-            int value = MainAcitvity.categories.get(category);
-            createProgress(category,value);
+        for(String category : categories.keySet()){
+            double value = categories.get(category);
+            if (value > 0.0){
+                createProgress(category,value);
+            }
         }
+
+//        Toast.makeText(this, "Categories : "+categories, Toast.LENGTH_SHORT).show();
+        System.out.println("Categories : "+categories);
 
     }
 
@@ -48,12 +58,9 @@ public class Progress extends AppCompatActivity implements OnProgressClick{
         super.onStart();
     }
 
-    private void createProgress(String category,int progress) {
-//        category = "Utilities";
-//        progress = 75;
+    private void createProgress(String category,double progress) {
 
         ProgressModel progressModel = new ProgressModel(category, progress);
-
         progressAdapter.add(progressModel);
 
     }

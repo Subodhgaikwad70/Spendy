@@ -9,9 +9,18 @@
         <item name="colorAccent">@color/teal_200</item>
     </style>
 
+
+
     <style name="CircularDeterminateProgressBar">
         <item name="android:indeterminateOnly">false</item>
         <item name="android:progressDrawable">@drawable/circular_view</item>
     </style>
+
+    <style name="RectangleDeterminateProgressBar">
+        <item name="android:indeterminateOnly">false</item>
+        <item name="android:progressDrawable">@drawable/horizontal_progress_bar</item>
+    </style>
+
+
 
 </resources>

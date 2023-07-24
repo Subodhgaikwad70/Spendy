@@ -3,11 +3,11 @@ package com.example.myapplication;
 public class ProgressModel {
 
     private String name;
-    private int progress;
+    private double progress;
     private String value;
 
 
-    public ProgressModel(String name, int progress) {
+    public ProgressModel(String name, double progress) {
         this.name = name;
         this.progress = progress;
 //        this.value = progress.toString();
@@ -21,7 +21,7 @@ public class ProgressModel {
         this.name = name;
     }
 
-    public int getProgress() {
+    public double getProgress() {
         return progress;
     }
 

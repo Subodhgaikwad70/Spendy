@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Background shape -->
+    <item android:id="@android:id/background">
+        <shape android:shape="rectangle"
+            android:useLevel="false">
+            <solid android:color="#EAEAEA" /> <!-- Set background color -->
+            <corners android:radius="20dp" /> <!-- Set border radius -->
+        </shape>
+    </item>
+
+    <!-- Progress shape -->
+    <item android:id="@android:id/progress">
+        <clip>
+            <shape android:shape="rectangle"
+                android:useLevel="true">
+                <solid android:color="#8ADAFF" /> <!-- Set progress color -->
+                <corners android:radius="20dp" /> <!-- Set border radius (same as background) -->
+            </shape>
+        </clip>
+    </item>
+
+<!--    <item>-->
+<!--        <shape-->
+<!--            android:shape="rectangle"-->
+<!--            android:thicknessRatio="16"-->
+<!--            android:useLevel="false">-->
+<!--            <solid android:color="@color/dark_blue_button" />-->
+<!--        </shape>-->
+<!--    </item>-->
+</layer-list>

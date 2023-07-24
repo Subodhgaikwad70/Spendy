@@ -2,6 +2,7 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.collection.ArrayMap;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -9,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -33,24 +35,37 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
+
+    private static final int SMS_PERMISSION_REQUEST_CODE = 100;
+
+    public static double balance;
+
+    private long total;
+
+    static List<DocumentSnapshot> dsList = new ArrayList<>();
+    static HashMap<String, Double> categories = new HashMap<>();
+
+    RecyclerView recyclerView,recyclerView01;
     ActivityMainAcitvityBinding binding;
     private ExpenseAdapter expenseAdapter;
+    public static ExpenseAdapter expenseAdapter01;
+
     Intent intent;
     private GestureDetector gestureDetector;
-    private long income = 0, expense=0;
-
-    RecyclerView recyclerView;
-
+    public static long income, expense;
     private float startY;
+
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -59,11 +74,20 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         binding = ActivityMainAcitvityBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
         ImageView imageView = binding.avatarView;
         Glide.with(this)
                 .load(R.drawable.icon_3)
                 .circleCrop()
                 .into(imageView);
+
+        binding.avatarView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent login_intent = new Intent(MainAcitvity.this,Login.class);
+                startActivity(login_intent);
+            }
+        });
 
 
         expenseAdapter = new ExpenseAdapter(this,this);
@@ -71,15 +95,20 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
+        expenseAdapter01 = new ExpenseAdapter(this,this);
+        recyclerView01 = binding.newExpense;
+        recyclerView01.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView01.setAdapter(expenseAdapter01);
+
 
         FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
 
-        intent=new Intent(this, AddExpense.class);
+        Intent add_exp_intent = new Intent(this, AddExpense.class);
 
         circular_add_button.setOnClickListener(view -> {
-            ExpenseModel expenseModel=null;
-            intent.putExtra("model",expenseModel);
-            startActivity(intent);
+            ExpenseModel expenseModel = null;
+            add_exp_intent.putExtra("model", expenseModel);
+            startActivity(add_exp_intent);
 
         });
 
@@ -87,15 +116,33 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
         gestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                int MIN_SWIPE_DISTANCE = 150;
-                float deltaX = e2.getX() - e1.getX();
-                float deltaY = e2.getY() - e1.getY();
 
-                // Check if the swipe is in the up direction and exceeds the minimum distance
-                if (deltaY < 0 && Math.abs(deltaY) > MIN_SWIPE_DISTANCE && Math.abs(deltaX) < MIN_SWIPE_DISTANCE) {
-                    Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
-                    startActivity(new Intent(MainAcitvity.this, Transactions.class),b);
-                    return true;
+                int SWIPE_THRESHOLD = 100;
+                int SWIPE_VELOCITY_THRESHOLD = 100;
+
+                float diffY = e2.getY() - e1.getY();
+                float diffX = e2.getX() - e1.getX();
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
+                        if (diffX > 0) {
+//                            onSwipeRight();
+                        } else {
+//                            onSwipeLeft();
+                            Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+                            startActivity(new Intent(MainAcitvity.this, Progress.class), b);
+                        }
+//                        result = true;
+                    }
+                } else if (Math.abs(diffY) > SWIPE_THRESHOLD && Math.abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) {
+                    if (diffY > 0) {
+//                        onSwipeBottom();
+                    } else {
+//                        onSwipeTop();
+                        Bundle b = ActivityOptions.makeSceneTransitionAnimation(MainAcitvity.this).toBundle();
+                        startActivity(new Intent(MainAcitvity.this, Transactions.class), b);
+//                    result = true;
+
+                    }
                 }
 
                 return false;
@@ -108,15 +155,51 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
             return true;
         });
 
+        binding.editIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent progress_intent = new Intent(MainAcitvity.this, Progress.class);
+                startActivity(progress_intent);
+            }
+        });
+
 
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(swipeToDeleteCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
+//        ItemTouchHelper itemTouchHelper01 = new ItemTouchHelper(swipeToDeleteCallback);
+//        itemTouchHelper01.attachToRecyclerView(recyclerView01);
+
+        // Start the service
+        Intent serviceIntent = new Intent(this, SmsService.class);
+        startService(serviceIntent);
+
+
+        if(FirebaseAuth.getInstance().getCurrentUser()==null)
+        {
+            Intent intent_login = new Intent(MainAcitvity.this, Login.class);
+            startActivity(intent_login);
+        }
+
+
+//        // Create an explicit intent for an Activity in your app
+//        Intent intent = new Intent(this, AlertDetails.class);
+//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
 
 
 
     }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        // Handle the intent from the notification here
+        // You can extract any data from the intent if needed
+    }
+
 
 
     @Override
@@ -125,12 +208,8 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
         if(FirebaseAuth.getInstance().getCurrentUser()==null)
         {
-            FirebaseAuth.getInstance()
-                    .signInAnonymously()
-                    .addOnSuccessListener(authResult -> {
-
-                    })
-                    .addOnFailureListener(e -> Toast.makeText(MainAcitvity.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+            Intent intent_login = new Intent(MainAcitvity.this, Login.class);
+            startActivity(intent_login);
         }
     }
 
@@ -151,18 +230,32 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     expenseAdapter.clear();
-                    List<DocumentSnapshot> dsList = queryDocumentSnapshots.getDocuments();
+                    categories.clear();
+                    dsList = queryDocumentSnapshots.getDocuments();
 
                     // Add the sorted expenseModels to the adapter
                     for (DocumentSnapshot ds:dsList) {
                         ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
 
+
+                        String category = expenseModel.getCategory();
+
+
                         if (expenseModel.getType().equals("Income")){
                             income+=expenseModel.getAmount();
                         }else{
                             expense+=expenseModel.getAmount();
+
+                            if (categories.containsKey(category)) {
+                                double noOfCat = categories.get(category);
+                                noOfCat = noOfCat + expenseModel.getAmount();
+                                categories.put(category, noOfCat);
+                            } else {
+                                categories.put(category, 0.0);
+                            }
+
                         }
-                        long total = income-expense;
+                        total = income-expense;
 
                         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
                         numberFormat.setCurrency(Currency.getInstance("INR"));
@@ -288,21 +381,25 @@ public class MainAcitvity extends AppCompatActivity implements OnItemsClick{
 
     void changeTotal(ExpenseModel expenseModel){
 
-        TextView totalspendview = findViewById(R.id.totalSpend);
-        String totalspend = totalspendview.getText().toString();
-        totalspend = totalspend.replace("₹", "").replace(",", "").replaceAll("\\s", "").trim();
-        double updatedspend=0;
-        if(expenseModel.getType().equals("Income")){
-            updatedspend = Double.parseDouble(totalspend) - expenseModel.getAmount();
-        }else{
-            updatedspend = Double.parseDouble(totalspend) + expenseModel.getAmount();
-        }
-
         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
         numberFormat.setCurrency(Currency.getInstance("INR"));
-        String rupees = numberFormat.format(updatedspend);
-        binding.totalSpend.setText(rupees);
 
+
+        if(expenseModel.getType().equals("Income")){
+            total = total - expenseModel.getAmount();
+        }else{
+            total = total + expenseModel.getAmount();
+        }
+
+        String rupees = numberFormat.format(total);
+        binding.totalSpend.setText(""+rupees);
+
+        if (expense > income) {
+            binding.totalSpend.setTextColor(Color.RED);
+        } else {
+            binding.totalSpend.setTextColor(Color.GREEN);
+        }
+        expenseAdapter.add(expenseModel);
     }
 
     @Override

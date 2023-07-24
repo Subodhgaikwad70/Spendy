@@ -171,7 +171,7 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         ExpenseModel expenseModel = ds.toObject(ExpenseModel.class);
                         expenseAdapter.add(expenseModel);
                     }
-                    Toast.makeText(Transactions.this, "getdata : success", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Transactions.this, "getdata : success", Toast.LENGTH_SHORT).show();
                     Log.i("My App","getData !");
                 });
         binding.progressBar0.setVisibility(View.GONE);
@@ -206,13 +206,13 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                         expenseAdapter.add(expenseModel);
                     }
                     expenseAdapter.notifyDataSetChanged();
-                    Toast.makeText(Transactions.this, "Success! "+filterby+" "+expenseAdapter.getItemCount(), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Transactions.this, "Success! "+filterby+" "+expenseAdapter.getItemCount(), Toast.LENGTH_SHORT).show();
                     Log.i("My App","Success! "+filterby+" "+expenseAdapter.getItemCount());
                 })
                 .addOnFailureListener(e -> {
                     expenseAdapter.clear();
                     expenseAdapter.notifyDataSetChanged();
-                    Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(Transactions.this, "Failed ! ", Toast.LENGTH_SHORT).show();
                 });
 
 //        if (expenseAdapter.getItemCount() == 0) {

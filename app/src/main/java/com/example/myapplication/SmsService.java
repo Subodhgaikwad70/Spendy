@@ -1,5 +1,3 @@
-package com.example.myapplication;
-
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,24 +10,8 @@ import android.os.Build;
 import android.os.IBinder;
 import android.provider.Telephony;
 import android.telephony.SmsMessage;
-import android.util.Log;
-import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Objects;
 
 public class SmsService extends Service {
-
-    private static final String NOTIFICAITON_CHANNEL_ID = "SMS Received";
-
-    private static final int NOTIFICAITON_ID = 100;
-    ArrayList<HashMap> msgList = new ArrayList<>();
-
 
     private BroadcastReceiver smsReceiver;
     private static final int NOTIFICATION_ID = 123; // Unique ID for the notification
@@ -46,7 +28,6 @@ public class SmsService extends Service {
             Notification notification = createNotification();
             startForeground(NOTIFICATION_ID, notification);
         }
-
     }
 
     @Override
@@ -66,21 +47,6 @@ public class SmsService extends Service {
 
                         // Add the new SMS message to your local list or database
                         // Update the UI to show the new message as unread
-
-                        HashMap<String,String> msg = new HashMap<>();
-                        msg.put(sender,messageBody);
-                        msgList.add(msg);
-
-                        FirebaseFirestore
-                                .getInstance()
-                                .collection("SMS Received "+FirebaseAuth.getInstance().getUid())
-                                .document(String.valueOf(Calendar.getInstance().getTimeInMillis()))
-                                .set(msg);
-//                        Toast.makeText(context, "Received : " + sender, Toast.LENGTH_SHORT).show();
-                        Log.i("My App","Received : "+sender+"\n"+messageBody);
-
-                        pushNotification(sender,messageBody);
-
                     }
                 }
             }
@@ -125,35 +91,8 @@ public class SmsService extends Service {
 
         builder.setContentTitle("SMS Service is running")
                 .setContentText("Listening for new SMS messages")
-                .setSmallIcon(R.drawable.icon_3);
+                .setSmallIcon(R.drawable.ic_notification);
 
         return builder.build();
-    }
-
-    public void pushNotification(String title,String content){
-
-
-        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-        Notification notification ;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            notification = new Notification.Builder(this)
-                    .setSmallIcon(R.drawable.icon_3)
-                    .setContentTitle(content)
-                    .setSubText(title)
-                    .setChannelId(NOTIFICAITON_CHANNEL_ID)
-                    .build();
-            nm.createNotificationChannel(new NotificationChannel(NOTIFICAITON_CHANNEL_ID,"SMS Received", NotificationManager.IMPORTANCE_HIGH));
-
-
-        }else{
-            notification = new Notification.Builder(this)
-                    .setSmallIcon(R.drawable.icon_3)
-                    .setContentTitle(content)
-                    .setSubText(title)
-                    .build();
-        }
-
-        nm.notify(NOTIFICAITON_ID,notification);
     }
 }

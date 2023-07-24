@@ -103,10 +103,24 @@ public class Login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(login_signup == 1){
-                    register();
+                String email, password;
+                email = binding.enterEmail.getText().toString();
+                password = binding.enterPassword.getText().toString();
+
+                if(TextUtils.isEmpty(email)){
+//                    Toast.makeText(Login.this, "Enter email !", Toast.LENGTH_SHORT).show();
+                    binding.enterEmail.setError("Required Field");
+
+                } else if (TextUtils.isEmpty(password)) {
+//                    Toast.makeText(Login.this, "Enter password !", Toast.LENGTH_SHORT).show();
+                    binding.enterPassword.setError("Required Field");
                 }else {
-                    signIn();
+
+                    if (login_signup == 1) {
+                        register();
+                    } else {
+                        signIn();
+                    }
                 }
 
             }
@@ -115,8 +129,8 @@ public class Login extends AppCompatActivity {
         binding.conitnue.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                System.out.println("continue clickec !");
                 signInAnanymously();
-                finish();
             }
         });
 
@@ -141,24 +155,42 @@ public class Login extends AppCompatActivity {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            Toast.makeText(this, "You are Already Logged in", Toast.LENGTH_SHORT).show();
-            binding.newUser.setVisibility(View.GONE);
-            binding.enterEmail.setVisibility(View.GONE);
-            binding.enterPassword.setVisibility(View.GONE);
-            binding.loginTitle.setText("Already Logged in ");
-            binding.loginBtn.setText("Logout");
-            binding.copyBtn.setVisibility(View.VISIBLE);
 
-            binding.loginBtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    signOut();
-                    startActivity(intent_main);
-                    finish();
+        if (currentUser != null) {
+            // User is logged in
+            if (currentUser.isAnonymous()) {
+                // User is logged in anonymously
+                // Handle the case here (e.g., show anonymous user UI or specific actions)
+//                Toast.makeText(this, "Logged in as a Guest !", Toast.LENGTH_SHORT).show();
+
+            } else {
+                // User is logged in with email or other authentication provider
+                // Handle the case here (e.g., show regular user UI or specific actions)
+                // You can also check the user's email if needed
+                String email = currentUser.getEmail();
+
+                if (email != null) {
+//                    Toast.makeText(this, "You are Already Logged in", Toast.LENGTH_SHORT).show();
+                    binding.newUser.setVisibility(View.GONE);
+                    binding.enterEmail.setVisibility(View.GONE);
+                    binding.enterPassword.setVisibility(View.GONE);
+                    binding.loginTitle.setText("Already Logged in ");
+                    binding.loginBtn.setText("Logout");
+                    binding.copyBtn.setVisibility(View.VISIBLE);
+
+                    binding.loginBtn.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            signOut();
+                            signInAnanymously();
+                        }
+                    });
+                    // User is logged in with email
                 }
-            });
-
+            }
+        } else {
+            // User is not logged in
+            // Handle the case here (e.g., show login screen or redirect to login activity)
         }
     }
 
@@ -167,15 +199,22 @@ public class Login extends AppCompatActivity {
             FirebaseAuth.getInstance()
                     .signInAnonymously()
                     .addOnSuccessListener(authResult -> {
-                        Toast.makeText(this, "Login succeed !", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(this, "Login succeed !", Toast.LENGTH_SHORT).show();
+                        System.out.println("Signed as Anonymous");
+                        startActivity(intent_main);
+                        finish();
                     })
-                    .addOnFailureListener(e -> Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                    .addOnFailureListener(e -> {
+//                        Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                        System.out.println("Signed as Anonymous");
+                    });
+
 
     }
 
     public void signOut(){
         FirebaseAuth.getInstance().signOut();
-        Toast.makeText(this, "SignOut !", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(this, "SignOut !", Toast.LENGTH_SHORT).show();
     }
 
 
@@ -186,12 +225,6 @@ public class Login extends AppCompatActivity {
         email = binding.enterEmail.getText().toString();
         password = binding.enterPassword.getText().toString();
 
-        if(TextUtils.isEmpty(email)){
-            Toast.makeText(Login.this, "Enter email !", Toast.LENGTH_SHORT).show();
-
-        } else if (TextUtils.isEmpty(password)) {
-            Toast.makeText(Login.this, "Enter password !", Toast.LENGTH_SHORT).show();
-        }else {
 
             mAuth.signInWithEmailAndPassword(email, password)
                     .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -200,8 +233,8 @@ public class Login extends AppCompatActivity {
                             if (task.isSuccessful()) {
                                 // Sign in success, update UI with the signed-in user's information
                                 Log.d(TAG, "SingIn succeed !");
-                                Toast.makeText(Login.this, "SingIn succeed !", Toast.LENGTH_SHORT).show();
-
+//                                Toast.makeText(Login.this, "SingIn succeed !", Toast.LENGTH_SHORT).show();
+                                binding.invalidError.setVisibility(View.GONE);
 
                                 startActivity(intent_main);
                                 finish();
@@ -209,13 +242,14 @@ public class Login extends AppCompatActivity {
                             } else {
                                 // If sign in fails, display a message to the user.
                                 Log.w(TAG, "signInWithEmail:failure", task.getException());
-                                Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(Login.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
+                                binding.invalidError.setVisibility(View.VISIBLE);
                             }
                             progressBar.setVisibility(View.GONE);
 
                         }
+
                     });
-        }
     }
 
     public void register(){
@@ -226,10 +260,12 @@ public class Login extends AppCompatActivity {
         password = binding.enterPassword.getText().toString();
 
         if(TextUtils.isEmpty(email)){
-            Toast.makeText(Login.this, "Enter email !", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(Login.this, "Enter email !", Toast.LENGTH_SHORT).show();
+            binding.enterEmail.setError("Required Field");
 
         } else if (TextUtils.isEmpty(password)) {
-            Toast.makeText(Login.this, "Enter password !", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(Login.this, "Enter password !", Toast.LENGTH_SHORT).show();
+            binding.enterPassword.setError("Required Field");
         }else {
 
             mAuth.createUserWithEmailAndPassword(email, password)
@@ -237,14 +273,15 @@ public class Login extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                Toast.makeText(Login.this, "Acount Created !", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(Login.this, "Acount Created !", Toast.LENGTH_SHORT).show();
+                                binding.invalidError.setVisibility(View.GONE);
                                 login_signup = 0;
                                 startActivity(intent_main);
                                 finish();
 
                             } else {
-                                Toast.makeText(Login.this, "Login Failed !", Toast.LENGTH_SHORT).show();
-
+//                                Toast.makeText(Login.this, "Login Failed !", Toast.LENGTH_SHORT).show();
+                                binding.invalidError.setVisibility(View.VISIBLE);
                             }
                             progressBar.setVisibility(View.GONE);
                         }

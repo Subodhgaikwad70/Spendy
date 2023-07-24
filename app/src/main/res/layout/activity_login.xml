@@ -8,8 +8,6 @@
     tools:context=".Login">
 
 
-
-
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
         android:layout_width="360dp"
@@ -46,6 +44,16 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <TextView
+
+                android:id="@+id/invalid_error"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Invalid Email or Password"
+                android:textColor="@color/red_pie"
+                android:visibility="gone"/>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/filledTextField1"
@@ -79,14 +87,14 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginEnd="32dp"
                 android:hint="Password"
-                android:inputType="text">
+                android:inputType="textPassword">
 
                 <!--this is the actual edit text which takes the input-->
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/enter_password"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="text" />
+                    android:inputType="textPassword" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

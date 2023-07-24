@@ -10,8 +10,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 
 public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.MyViewHolder> {
 
@@ -29,17 +32,22 @@ public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.MyView
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.progress_card,parent,false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.progress_card_rectangular,parent,false);
         return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProgressAdapter.MyViewHolder holder, int position) {
+        double total_expense = MainAcitvity.expense;
+
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+//        numberFormat.setCurrency(Currency.getInstance("INR"));
+
         ProgressModel progressModel = progressModelList.get(position);
         holder.name.setText(progressModel.getName());
-        holder.value.setText(String.valueOf((progressModel.getProgress())*100/progressModelList.size())+"%");
-        holder.progressBar.setProgress((progressModel.getProgress())*100/progressModelList.size());
-
+        holder.value.setText((Math.ceil((progressModel.getProgress())*100/total_expense))+"%");
+        holder.progressBar.setProgress((int) Math.ceil((progressModel.getProgress())*100/total_expense));
+        holder.amount.setText(numberFormat.format((int) progressModel.getProgress())+"/"+numberFormat.format(((int) total_expense)));
         holder.itemView.setOnClickListener(view -> onProgressClick.onClick(progressModel));
 
     }
@@ -61,12 +69,13 @@ public class ProgressAdapter extends RecyclerView.Adapter<ProgressAdapter.MyView
 
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
-        private TextView name,value;
+        private TextView name,value,amount;
         private ProgressBar progressBar;
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.progress_name);
             value = itemView.findViewById(R.id.progress_value);
+            amount = itemView.findViewById(R.id.amount);
             progressBar = itemView.findViewById(R.id.progress_bar);
         }
     }
