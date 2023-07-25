@@ -14,7 +14,7 @@
       },
       "oauth_client": [
         {
-          "client_id": "506215606548-kruu965vhihqhnt6i50nsh6p0qr8qdn3.apps.googleusercontent.com",
+          "client_id": "506215606548-91252c7ag39vmplcg67rdmp0ff0olr4i.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -27,7 +27,36 @@
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "506215606548-kruu965vhihqhnt6i50nsh6p0qr8qdn3.apps.googleusercontent.com",
+              "client_id": "506215606548-91252c7ag39vmplcg67rdmp0ff0olr4i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:506215606548:android:09f154327393c468c2ba01",
+        "android_client_info": {
+          "package_name": "com.subodh.spendy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "506215606548-91252c7ag39vmplcg67rdmp0ff0olr4i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBu5TC7jnUqlJo7rxuJzaJEO4PjfZXqojM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "506215606548-91252c7ag39vmplcg67rdmp0ff0olr4i.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
