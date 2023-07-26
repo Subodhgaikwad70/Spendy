@@ -4,11 +4,14 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -56,6 +59,13 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         holder.note.setText(expenseModel.getNote());
         holder.title.setText(expenseModel.getTitle());
 
+//        holder.category_icon.setImageResource(setIcon(expenseModel.getCategory()));
+
+//        Glide.with(holder.itemView)
+//                .load(R.drawable.icon_3)
+//                .circleCrop()
+//                .into(holder.category_icon);
+
         // Create a NumberFormat instance for Indian Rupees
         NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
         numberFormat.setCurrency(Currency.getInstance("INR"));
@@ -74,6 +84,46 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
 
 
     }
+
+    @Override
+    public int getItemCount() {
+
+        return expenseModelList.size();
+    }
+
+    public ExpenseModel getItem(int position) {
+        return expenseModelList.get(position);
+    }
+
+
+    public void removeItem(int position) {
+        expenseModelList.remove(position);
+    }
+
+    public void insertItem(ExpenseModel deletedExpenseModel, int position) {
+        expenseModelList.add(position,deletedExpenseModel);
+    }
+
+    public List<ExpenseModel> getExpenseModelsList() {
+        return expenseModelList;
+    }
+
+
+    // Viewholder model
+    public class MyViewHolder extends RecyclerView.ViewHolder{
+        private TextView note, title, category, amount, date;
+        private ImageView category_icon;
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            category_icon = itemView.findViewById(R.id.category_image);
+            progressBar = itemView.findViewById(R.id.progress_bar0);
+            note = itemView.findViewById(R.id.note_view);
+            amount = itemView.findViewById(R.id.payment_amount);
+            title = itemView.findViewById(R.id.payment_title);
+            date = itemView.findViewById(R.id.date_view);
+        }
+    }
+
 
     public String formatTime(long time){
         //
@@ -101,40 +151,28 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
         return formattedDateTime;
     }
 
-    @Override
-    public int getItemCount() {
 
-        return expenseModelList.size();
-    }
-
-    public ExpenseModel getItem(int position) {
-        return expenseModelList.get(position);
-    }
-
-
-    public void removeItem(int position) {
-        expenseModelList.remove(position);
-    }
-
-    public void insertItem(ExpenseModel deletedExpenseModel, int position) {
-        expenseModelList.add(position,deletedExpenseModel);
-    }
-
-    public List<ExpenseModel> getExpenseModelsList() {
-        return expenseModelList;
-    }
-
-
-    public class MyViewHolder extends RecyclerView.ViewHolder{
-        private TextView note, title, category, amount, date;
-        public MyViewHolder(@NonNull View itemView) {
-            super(itemView);
-            progressBar = itemView.findViewById(R.id.progress_bar0);
-            note = itemView.findViewById(R.id.note_view);
-            amount = itemView.findViewById(R.id.payment_amount);
-            title = itemView.findViewById(R.id.payment_title);
-            date = itemView.findViewById(R.id.date_view);
-        }
+    private int setIcon(String category){
+        if (category.equals("Utilities"))
+            return R.drawable.utilities01_24;
+        else if (category.equals("Borrow"))
+            return R.drawable.borrows_24;
+        else if (category.equals("Payment"))
+            return R.drawable.payment_24;
+        else if (category.equals("Food and Dinning"))
+            return R.drawable.food_and_dining01_24;
+        else if (category.equals("Travel"))
+            return R.drawable.travel_24;
+        else if (category.equals("Shopping"))
+            return R.drawable.shopping_24;
+        else if (category.equals("Entertainment"))
+            return R.drawable.entertainment_24;
+        else if (category.equals("Groceries"))
+            return R.drawable.groceries_24;
+        else if (category.equals("Miscellaneous"))
+            return R.drawable.miscellaneous_24;
+        else
+            return R.drawable.icon_3;
     }
 
 

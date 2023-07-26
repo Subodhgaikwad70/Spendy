@@ -41,9 +41,7 @@ import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity implements OnItemsClick{
 
-    private static final int SMS_PERMISSION_REQUEST_CODE = 100;
-
-    public static double balance;
+    public static final String app = "Spendy";
 
     private long total;
 
@@ -51,8 +49,7 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
     static HashMap<String, Double> categories = new HashMap<>();
 
     RecyclerView recyclerView,recyclerView01;
-//    ActivityMainActivityBinding binding;
-//    ActivityMainAcitvityBinding binding;
+
     ActivityMainActivityBinding binding;
 
     private ExpenseAdapter expenseAdapter;
@@ -78,12 +75,9 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
                 .circleCrop()
                 .into(imageView);
 
-        binding.avatarView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent login_intent = new Intent(MainActivity.this,Login.class);
-                startActivity(login_intent);
-            }
+        binding.avatarView.setOnClickListener(view -> {
+            Intent login_intent = new Intent(MainActivity.this,Login.class);
+            startActivity(login_intent);
         });
 
 
@@ -98,11 +92,9 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
         recyclerView01.setAdapter(expenseAdapter01);
 
 
-        FloatingActionButton circular_add_button = findViewById(R.id.circular_add_button);
-
         Intent add_exp_intent = new Intent(this, AddExpense.class);
 
-        circular_add_button.setOnClickListener(view -> {
+        binding.circularAddButton.setOnClickListener(view -> {
             ExpenseModel expenseModel = null;
             add_exp_intent.putExtra("model", expenseModel);
             startActivity(add_exp_intent);

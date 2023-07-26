@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/SCREEN"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainAcitvity">
+    android:layout_height="wrap_content"
+    tools:context=".MainActivity">
 
     <LinearLayout
         android:id="@+id/linear1"
@@ -13,10 +13,10 @@
         android:layout_height="50dp"
         android:orientation="horizontal"
         android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@id/newExpense"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/newExpense">
+        app:layout_constraintTop_toTopOf="parent">
 
 
         <ImageView
@@ -48,22 +48,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:maxHeight="120dp"
+        app:layout_constraintBottom_toTopOf="@id/cardView0"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/linear1"
-        app:layout_constraintBottom_toTopOf="@id/cardView0"/>
+        app:layout_constraintTop_toBottomOf="@id/linear1" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView0"
         android:layout_width="360dp"
         android:layout_height="120dp"
+        android:layout_marginTop="8dp"
         android:layout_marginStart="1dp"
         android:layout_marginEnd="1dp"
         android:foregroundGravity="center"
         android:textAlignment="center"
         app:cardCornerRadius="20dp"
         app:cardElevation="0dp"
-        app:layout_constraintBottom_toTopOf="@+id/piechart_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/newExpense">
@@ -119,7 +119,6 @@
         android:padding="20dp"
         android:textAlignment="center"
         app:cardCornerRadius="20dp"
-        app:layout_constraintBottom_toTopOf="@id/recyclerView1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/cardView0">
@@ -224,11 +223,11 @@
         app:layout_constraintGuide_begin="20dp" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline3"
+        android:id="@+id/guideline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        app:layout_constraintGuide_begin="20dp" />
+        app:layout_constraintGuide_end="639dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

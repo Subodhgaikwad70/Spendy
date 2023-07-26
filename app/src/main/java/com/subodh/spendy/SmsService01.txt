@@ -1,0 +1,279 @@
+package com.subodh.spendy;
+
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Build;
+import android.os.IBinder;
+import android.provider.Telephony;
+import android.telephony.SmsMessage;
+import android.util.Log;
+
+import androidx.collection.ArraySet;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.NumberFormat;
+import java.util.Calendar;
+import java.util.Currency;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class SmsService01 {
+}
+
+
+
+
+
+/// just for note
+
+
+package com.subodh.spendy;
+
+        import android.app.Notification;
+        import android.app.NotificationChannel;
+        import android.app.NotificationManager;
+        import android.app.Service;
+        import android.content.BroadcastReceiver;
+        import android.content.Context;
+        import android.content.Intent;
+        import android.content.IntentFilter;
+        import android.graphics.Bitmap;
+        import android.graphics.drawable.BitmapDrawable;
+        import android.graphics.drawable.Drawable;
+        import android.os.Build;
+        import android.os.IBinder;
+        import android.provider.Telephony;
+        import android.telephony.SmsMessage;
+        import android.util.Log;
+
+        import androidx.collection.ArraySet;
+        import androidx.core.app.NotificationCompat;
+        import androidx.core.content.res.ResourcesCompat;
+
+        import com.google.firebase.auth.FirebaseAuth;
+        import com.google.firebase.firestore.FirebaseFirestore;
+
+        import java.text.NumberFormat;
+        import java.util.Calendar;
+        import java.util.Currency;
+        import java.util.HashMap;
+        import java.util.Locale;
+        import java.util.UUID;
+        import java.util.regex.Matcher;
+        import java.util.regex.Pattern;
+
+public class SmsService extends Service {
+
+    private BroadcastReceiver smsReceiver;
+
+    HashMap<Double, String> newExpense = new HashMap<Double, String>();
+    ArraySet<HashMap<String, String>> msgList;
+    private static final int NOTIFICATION_ID = 123; // Unique ID for the notification
+    private static final String CHANNEL_ID = "sms_service_channel";
+    private static final String NOTIFICATION_CHANNEL_ID = "SMS RECEIVED";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        registerSmsReceiver();
+
+        // Start the service as a foreground service (for Android 8.0 and above)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel(CHANNEL_ID,"SMS Service");
+            Notification notification = createNotification();
+            startForeground(NOTIFICATION_ID, notification);
+        }
+    }
+
+
+
+    private HashMap parseSmsMessage(String smsMessage) {
+        // Pattern amountPattern = Pattern.compile("(Rs|₹)\\s?([^.\\s]?+(?:\\.\\d+)?)");
+        Pattern amountPattern = Pattern.compile("(Rs|₹)\\s?\\.?(\\d+(?:\\,\\d+)?(?:\\.\\d{1,2})?)"); // Matches amounts with Rs/₹ symbol
+        Pattern creditPattern = Pattern.compile("(credited|received|deposit|added)"); // Matches various credit keywords
+        Pattern debitPattern = Pattern.compile("(sent|debited|withdrawn|deducted)"); // Matches various debit keywords
+
+        Matcher amountMatcher = amountPattern.matcher(smsMessage);
+        Matcher creditMatcher = creditPattern.matcher(smsMessage);
+        Matcher debitMatcher = debitPattern.matcher(smsMessage);
+
+        if (amountMatcher.find()) {
+            String rupeeSymbol = amountMatcher.group(1);
+            String amountString = amountMatcher.group(2).replace(",", ""); // Remove commas from the amount string
+            // String amountString = amountMatcher.group(2);
+
+            System.out.println("\n\n"+amountString);
+
+            double amount = Double.parseDouble(amountString);
+//            System.out.println("Amount (in Rupees): " + amount);
+            System.out.println(smsMessage);
+
+            String type = "Expense",title = "Debited";
+
+            if (creditMatcher.find()) {
+                title = "Credited";
+                type="Income";
+                System.out.println("Transaction Type: Credited");
+            } else if (debitMatcher.find()) {
+                System.out.println("Transaction Type: Debited");
+            } else {
+                System.out.println("Transaction Type: Unknown");
+            }
+
+            newExpense.put(amount,type);
+
+            String expenseId = UUID.randomUUID().toString();
+            ExpenseModel addExpenseModel = new ExpenseModel(expenseId,title,Long.parseLong(amountString),null,type,null, Calendar.getInstance().getTimeInMillis(),null);
+            MainActivity.expenseAdapter01.add(addExpenseModel);
+
+            pushNotification(type,amountString);
+            return newExpense;
+
+        } else {
+            System.out.println("\n\nAmount not found in the SMS message.");
+            System.out.println(smsMessage);
+            return null;
+        }
+
+    }
+
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return START_STICKY; // Service will be restarted if it gets killed by the system
+    }
+
+    private void registerSmsReceiver() {
+        smsReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (intent.getAction() != null && intent.getAction().equals(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)) {
+                    SmsMessage[] smsMessages = Telephony.Sms.Intents.getMessagesFromIntent(intent);
+                    for (SmsMessage smsMessage : smsMessages) {
+                        String sender = smsMessage.getDisplayOriginatingAddress();
+                        String messageBody = smsMessage.getMessageBody();
+
+                        // Add the new SMS message to your local list or database
+                        // Update the UI to show the new message as unread
+
+
+                        HashMap<String,String> msg = new HashMap<>();
+                        msg.put(sender,messageBody);
+
+                        msgList.add(msg);
+
+                        FirebaseFirestore
+                                .getInstance()
+                                .collection("SMS Received "+ FirebaseAuth.getInstance().getUid())
+                                .document(String.valueOf(Calendar.getInstance().getTimeInMillis()))
+                                .set(msg);
+//                        Toast.makeText(context, "Received : " + sender, Toast.LENGTH_SHORT).show();
+
+                        Log.i(MainActivity.app,"Received : "+sender+"\n"+messageBody);
+                        parseSmsMessage(messageBody);
+
+                        pushNotification(sender,messageBody);
+
+                    }
+                }
+            }
+        };
+
+        // Register the BroadcastReceiver to listen for SMS_RECEIVED_ACTION
+        IntentFilter intentFilter = new IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION);
+        registerReceiver(smsReceiver, intentFilter);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(smsReceiver);
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    // For Android 8.0 and above, create a notification channel and notification
+    private void createNotificationChannel(String channel_id, String name) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channel_id,
+                    name,
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
+        }
+    }
+
+    private Notification createNotification() {
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, CHANNEL_ID);
+        } else {
+            builder = new Notification.Builder(this);
+        }
+
+
+        builder.setContentTitle("SMS Service is running")
+                .setContentText("Listening for new SMS messages")
+                .setSmallIcon(R.drawable.icon_3);
+
+        return builder.build();
+    }
+
+
+    private void pushNotification(String type, String amountString) {
+
+        //Data Preprocessing
+
+        NumberFormat numberFormat = NumberFormat.getCurrencyInstance(new Locale("en", "IN"));
+        numberFormat.setCurrency(Currency.getInstance("INR"));
+        String amount_in_rupees = numberFormat.format(amountString);
+
+//        Drawable drawable = ResourcesCompat.getDrawable(getResources(),R.drawable.icon_3,null);
+//        BitmapDrawable bitmapDrawable =(BitmapDrawable) drawable;
+//        Bitmap largeIcon = bitmapDrawable.getBitmap();
+
+
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        Notification notification ;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            notification = new Notification.Builder(this)
+                    .setSmallIcon(R.drawable.icon_3)
+                    .setContentTitle(amount_in_rupees)
+                    .setSubText(type)
+                    .setChannelId(NOTIFICATION_CHANNEL_ID)
+                    .build();
+            nm.createNotificationChannel(new NotificationChannel(NOTIFICATION_CHANNEL_ID,"Login", NotificationManager.IMPORTANCE_HIGH));
+
+
+        }else{
+            notification = new Notification.Builder(this)
+                    .setSmallIcon(R.drawable.icon_3)
+                    .setContentTitle(amount_in_rupees)
+                    .setSubText(type)
+                    .build();
+        }
+
+        nm.notify(NOTIFICATION_ID,notification);
+
+
+    }
+
+}

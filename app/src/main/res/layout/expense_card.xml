@@ -5,7 +5,7 @@
     style="@style/SCREEN"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/transparent"
+    app:barrierMargin="2dp"
     app:layout_constraintCircleRadius="20dp">
 
     <androidx.cardview.widget.CardView
@@ -26,10 +26,10 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
             android:layout_gravity="center"
             android:foregroundGravity="center"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
             android:textAlignment="center">
 
             <ImageView
@@ -37,6 +37,8 @@
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginStart="16dp"
+                android:maxWidth="60dp"
+                android:maxHeight="60dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

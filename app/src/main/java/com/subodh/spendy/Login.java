@@ -27,6 +27,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 public class Login extends AppCompatActivity {
     private static final String NOTIFICAITON_CHANNEL_ID = "Normal";
+    String sourceCollection;
     private static final int NOTIFICAITON_ID = 1001;
 
     private  static int login_signup = 0;
@@ -155,14 +156,10 @@ public class Login extends AppCompatActivity {
         if (currentUser != null) {
             // User is logged in
             if (currentUser.isAnonymous()) {
-                // User is logged in anonymously
-                // Handle the case here (e.g., show anonymous user UI or specific actions)
-//                Toast.makeText(this, "Logged in as a Guest !", Toast.LENGTH_SHORT).show();
+                sourceCollection = currentUser.getUid();
 
             } else {
-                // User is logged in with email or other authentication provider
-                // Handle the case here (e.g., show regular user UI or specific actions)
-                // You can also check the user's email if needed
+
                 String email = currentUser.getEmail();
 
                 if (email != null) {
@@ -173,6 +170,9 @@ public class Login extends AppCompatActivity {
                     binding.loginTitle.setText("Already Logged in ");
                     binding.loginBtn.setText("Logout");
                     binding.copyBtn.setVisibility(View.VISIBLE);
+                    // for showing the username
+//                    binding.userName.setVisibility(View.VISIBLE);
+//                    binding.userName.setText("SUBODH GAIKWAD");
 
                     binding.loginBtn.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -288,7 +288,7 @@ public class Login extends AppCompatActivity {
 
 
     public void copyDocuments() {
-        final String sourceCollection = "RIPrhfph98WgnMHFldGCpLc2aUd2";
+
         final String destinationCollection = FirebaseAuth.getInstance().getUid();
 
         firestore.collection(sourceCollection).get()
