@@ -74,7 +74,9 @@ public class Login extends AppCompatActivity {
                     .build();
         }
 
-        nm.notify(NOTIFICAITON_ID,notification);
+
+
+//        nm.notify(NOTIFICAITON_ID,notification);
 
         binding.newUser.setOnClickListener(new View.OnClickListener() {
             @Override

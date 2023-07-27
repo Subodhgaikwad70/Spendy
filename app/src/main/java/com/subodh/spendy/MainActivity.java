@@ -1,7 +1,10 @@
 package com.subodh.spendy;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -9,9 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,11 +43,13 @@ import com.subodh.spendy.databinding.ActivityMainActivityBinding;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements OnItemsClick{
 
@@ -59,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
     private GestureDetector gestureDetector;
     public static long income, expense;
     private float startY;
+    public final static String NOTIFICATION_CHANNEL_ID = "Main";
+    public final static int NOTIFICATION_ID = 100;
 
 
     @SuppressLint("ClickableViewAccessibility")
@@ -86,10 +100,12 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(expenseAdapter);
 
+
         expenseAdapter01 = new ExpenseAdapter(this,this);
         recyclerView01 = binding.newExpense;
         recyclerView01.setLayoutManager(new LinearLayoutManager(this));
         recyclerView01.setAdapter(expenseAdapter01);
+
 
 
         Intent add_exp_intent = new Intent(this, AddExpense.class);
@@ -144,12 +160,9 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
             return true;
         });
 
-        binding.editIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent progress_intent = new Intent(MainActivity.this, Progress.class);
-                startActivity(progress_intent);
-            }
+        binding.editIcon.setOnClickListener(view -> {
+            Intent progress_intent = new Intent(MainActivity.this, Progress.class);
+            startActivity(progress_intent);
         });
 
 
@@ -164,18 +177,7 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
         Intent serviceIntent = new Intent(this, SmsService.class);
         startService(serviceIntent);
 
-
-//        if(FirebaseAuth.getInstance().getCurrentUser()==null)
-//        {
-//            Intent intent_login = new Intent(MainActivity.this, Login.class);
-//            startActivity(intent_login);
-//        }
-
-
-//        // Create an explicit intent for an Activity in your app
-//        Intent intent = new Intent(this, AlertDetails.class);
-//        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+//        getBroadcastIntent();
 
         FirebaseApp.initializeApp(this); // Initialize FirebaseApp
 
@@ -185,8 +187,22 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        // Handle the intent from the notification here
-        // You can extract any data from the intent if needed
+//        handleNotificationIntent(intent);
+    }
+
+    private void handleNotificationIntent(Intent intent) {
+        if (intent != null) {
+            String value1 = intent.getStringExtra("key1");
+            int value2 = intent.getIntExtra("key2", 0);
+            // ...
+
+            // Update the values in your activity
+            // For example, update TextViews or other UI elements
+
+            expenseAdapter01.notifyDataSetChanged();
+            Log.i(TAG, "handleNotificationIntent: "+intent.getStringExtra("title")+intent.getStringExtra("content"));
+            // ...
+        }
     }
 
 
@@ -214,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
     public void getData() {
         income =0;
         expense = 0;
+
         FirebaseFirestore.getInstance()
                 .collection(Objects.requireNonNull(FirebaseAuth.getInstance().getUid()))
                 .orderBy("time", Query.Direction.DESCENDING)
@@ -338,9 +355,7 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
                     // Show the Snackbar with an undo action
                     Snackbar snackbar = Snackbar.make(recyclerView, ""+deletedExpenseModel.getTitle()+" is deleted !", Snackbar.LENGTH_LONG);
                     snackbar.setAction("Undo", v -> {
-                        // Handle the undo action here
 
-                        // For example, to restore the deleted item:
                         expenseAdapter.insertItem(deletedExpenseModel,position);
                         expenseAdapter.notifyItemInserted(position);
                         FirebaseFirestore
@@ -351,6 +366,7 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
                         changeTotal(deletedExpenseModel);
                         getData();
                     });
+
                     snackbar.setDuration(3000);
                     snackbar.show();
                     break;
@@ -395,7 +411,6 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
     @Override
     public boolean onTouchEvent(MotionEvent e) {
 
-
         switch (e.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 startY = e.getY();
@@ -409,6 +424,51 @@ public class MainActivity extends AppCompatActivity implements OnItemsClick{
         }
         return super.onTouchEvent(e);
     }
+
+//    public void sendNotification(String title,String content){
+//
+//        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        Notification notification = null;
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            notification = new Notification.Builder(this)
+//                    .setSmallIcon(R.drawable.icon_3)
+//                    .setContentTitle(title)
+//                    .setSubText(content)
+//                    .setAutoCancel(true)
+//                    .setChannelId(NOTIFICATION_CHANNEL_ID)
+//                    .build();
+//            nm.createNotificationChannel(new NotificationChannel(NOTIFICATION_CHANNEL_ID,"newExpense", NotificationManager.IMPORTANCE_DEFAULT));
+//        }
+//
+//        nm.notify(NOTIFICATION_ID,notification);
+//    }
+
+//    private void getBroadcastIntent(){
+//
+//        Intent intent1 = new Intent(this, SmsReceiver.class);
+////        intent1.putExtra("Hii","hello");
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent1, PendingIntent.FLAG_IMMUTABLE);
+//        String content = intent1.getStringExtra("amount");
+//        String title = intent1.getStringExtra("title");
+//
+//
+//        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        Notification notification = null;
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//            notification = new Notification.Builder(this)
+//                    .setSmallIcon(R.drawable.icon_3)
+//                    .setContentTitle(title)
+//                    .setSubText(content)
+//                    .setContentIntent(pendingIntent)
+//                    .setAutoCancel(true)
+//                    .setChannelId(MainActivity.NOTIFICATION_CHANNEL_ID)
+//                    .build();
+//            nm.createNotificationChannel(new NotificationChannel(MainActivity.NOTIFICATION_CHANNEL_ID,"newExpense", NotificationManager.IMPORTANCE_DEFAULT));
+//        }
+//
+//        nm.notify(MainActivity.NOTIFICATION_ID,notification);
+//    }
+
 
 }
 

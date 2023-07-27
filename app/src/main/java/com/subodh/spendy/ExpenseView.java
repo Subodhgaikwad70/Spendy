@@ -12,7 +12,6 @@ public class ExpenseView extends AppCompatActivity {
     ActivityExpenseViewBinding binding;
     private ExpenseModel expenseModel;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,16 +48,6 @@ public class ExpenseView extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-
-        // still not working
-        expenseModel = (ExpenseModel) getIntent().getSerializableExtra("model");
-
-        binding.titleView.setText(expenseModel.getTitle());
-        binding.amountView.setText("Amount    :  "+String.valueOf(expenseModel.getAmount()));
-        binding.categoryView.setText("Category  :  "+expenseModel.getCategory());
-        binding.typeView.setText("Type         :  "+expenseModel.getType());
-        binding.noteView.setText("Note         :  "+expenseModel.getNote());
-
         super.onResume();
     }
 }

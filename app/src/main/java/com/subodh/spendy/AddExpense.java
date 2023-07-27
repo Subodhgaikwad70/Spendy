@@ -91,20 +91,11 @@ public class AddExpense extends AppCompatActivity  {
                     createExpense();
                 }else{
                     updateExpense();
+
                 }
 
-                Intent expense_view_intent = new Intent(this, ExpenseView.class);
-                expense_view_intent.putExtra("model",expenseModel);
-                finish();
             }
         });
-    }
-
-    @Override
-    public void onBackPressed() {
-        // Perform your desired functionality here
-        expenseModel = null;
-        super.onBackPressed();
     }
 
     private void createExpense() {
@@ -167,8 +158,8 @@ public class AddExpense extends AppCompatActivity  {
                 .set(model);
 
 //        MainActivity.getData();
-        finish();
         expenseModel = null;
+        finish();
     }
 
 }

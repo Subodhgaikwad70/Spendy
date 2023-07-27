@@ -109,6 +109,7 @@ public class ExpenseAdapter extends RecyclerView.Adapter<ExpenseAdapter.MyViewHo
     }
 
 
+
     // Viewholder model
     public class MyViewHolder extends RecyclerView.ViewHolder{
         private TextView note, title, category, amount, date;

@@ -108,6 +108,8 @@ public class Transactions extends AppCompatActivity implements OnItemsClick {
                     Log.i("My App","All FilteredData !"+filterby);
                     recyclerView.setAdapter(expenseAdapter);
                 }
+
+
             }
 
             @Override
